@@ -1,0 +1,140 @@
+# 05 — Persistência e Formato de Projeto
+
+## Filosofia
+
+- local-first;
+- transações para mudanças estruturais;
+- dados recuperáveis;
+- formato versionado;
+- assets não armazenados como BLOB por padrão;
+- nenhuma edição depende de conexão remota.
+
+## Estrutura física
+
+Durante desenvolvimento, usar projeto como diretório:
+
+```text
+MyBook.bookmaker/
+├─ manifest.json
+├─ project.db
+├─ assets/
+│  ├─ images/
+│  ├─ covers/
+│  ├─ ornaments/
+│  └─ fonts/
+├─ recovery/
+├─ snapshots/
+└─ cache/
+```
+
+No futuro, `.bookmaker` pode ser um pacote/arquivo compactado para distribuição. O editor deve trabalhar sobre uma workspace descompactada/segura, nunca alterar diretamente um ZIP a cada tecla.
+
+## `manifest.json`
+
+Informações mínimas para identificar e migrar o projeto antes de abrir o banco.
+
+```json
+{
+  "format": "bookmaker-project",
+  "formatVersion": 1,
+  "projectId": "...",
+  "createdBy": "BookMaker",
+  "minimumAppVersion": "..."
+}
+```
+
+## SQLite
+
+Tabelas conceituais:
+
+```text
+projects
+metadata
+contributors
+documents
+document_content
+assets
+style_profiles
+export_profiles
+snapshots
+schema_migrations
+```
+
+Evitar EAV genérico para o domínio principal.
+
+## Conteúdo do editor
+
+Guardar conteúdo textual separadamente da linha da árvore para:
+- lazy loading;
+- reduzir writes;
+- permitir migrations específicas;
+- facilitar snapshots.
+
+Exemplo:
+
+```text
+documents
+- id
+- parent_id
+- kind
+- role
+- title
+- position
+- status
+
+document_content
+- document_id
+- schema_version
+- json_content
+- updated_at
+```
+
+## Autosave
+
+Objetivo: usuário nunca precisar pensar no botão Save.
+
+Estratégia:
+
+1. mudanças do editor ficam em memória imediatamente;
+2. debounce curto grava o documento alterado;
+3. operações estruturais são transacionais e imediatas;
+4. flush ocorre ao trocar de documento e antes de exportar;
+5. janela fecha somente após flush ou apresenta erro explícito.
+
+Não regravar o projeto completo a cada tecla.
+
+## Recovery
+
+Separar **autosave** de **recovery**.
+
+- autosave = estado normal persistido;
+- recovery = proteção contra write interrompido/crash.
+
+Manter journal/checkpoint de documentos sujos. Na inicialização, detectar sessão não encerrada e oferecer recuperação quando houver divergência.
+
+## Snapshots
+
+Snapshots são versões de segurança semânticas.
+
+- manual na V1.1 ou posterior;
+- automáticos antes de migration destrutiva;
+- automáticos opcionalmente antes de export/import grande.
+
+## Migrations
+
+Cada mudança persistida requer migration incremental.
+
+Regras:
+- migrations nunca dependem de UI;
+- backup/snapshot antes de migration não reversível;
+- abrir projeto mais novo com app antigo deve falhar de modo legível;
+- testes com fixtures reais de versões anteriores.
+
+## Integridade de assets
+
+- caminho sempre relativo ao projeto;
+- nome físico pode usar AssetId para evitar colisões;
+- manter nome original como metadata;
+- deletar asset só quando não referenciado ou após confirmação;
+- cache/thumbnails são descartáveis;
+- assets nunca dependem de caminhos absolutos da máquina original.
