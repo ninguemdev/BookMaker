@@ -21,6 +21,10 @@ log = "0.4"
 tauri = { version = "2", features = [] }
 tauri-plugin-log = "2"
 
+[lints.rust]
+# MSVC prints import-library creation on stdout for the Tauri cdylib.
+linker_messages = "allow"
+
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
 [profile.release]
