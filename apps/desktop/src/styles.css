@@ -1,0 +1,46 @@
+@import "@bookmaker/ui/tokens.css";
+
+:root {
+  font-family: var(--bm-font-family-interface);
+  font-size: var(--bm-font-size-md);
+  font-weight: var(--bm-font-weight-regular);
+  line-height: var(--bm-line-height-normal);
+  color: var(--bm-color-text-primary);
+  background: var(--bm-color-surface-app);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 20rem;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--bm-color-surface-app);
+}
+
+main {
+  padding: var(--bm-space-6);
+}
+
+h1 {
+  margin: 0;
+  font-size: var(--bm-font-size-2xl);
+  font-weight: var(--bm-font-weight-semibold);
+  line-height: var(--bm-line-height-tight);
+}
+
+::selection {
+  color: var(--bm-color-text-primary);
+  background: var(--bm-color-accent-subtle);
+}
+
+:focus-visible {
+  outline: var(--bm-focus-ring-width) solid var(--bm-color-focus-ring);
+  outline-offset: var(--bm-focus-ring-offset);
+}

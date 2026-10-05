@@ -1,0 +1,12 @@
+{
+  "name": "@bookmaker/ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "files": [
+    "src/tokens.css"
+  ],
+  "exports": {
+    "./tokens.css": "./src/tokens.css"
+  }
+}

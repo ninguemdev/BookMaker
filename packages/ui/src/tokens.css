@@ -1,0 +1,67 @@
+:root {
+  color-scheme: light;
+
+  /* Typography */
+  --bm-font-family-interface:
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --bm-font-size-xs: 0.75rem;
+  --bm-font-size-sm: 0.875rem;
+  --bm-font-size-md: 1rem;
+  --bm-font-size-lg: 1.25rem;
+  --bm-font-size-xl: 1.5rem;
+  --bm-font-size-2xl: 2rem;
+  --bm-line-height-tight: 1.25;
+  --bm-line-height-normal: 1.5;
+  --bm-line-height-relaxed: 1.7;
+  --bm-font-weight-regular: 400;
+  --bm-font-weight-medium: 500;
+  --bm-font-weight-semibold: 600;
+
+  /* Spacing */
+  --bm-space-1: 0.25rem;
+  --bm-space-2: 0.5rem;
+  --bm-space-3: 0.75rem;
+  --bm-space-4: 1rem;
+  --bm-space-5: 1.5rem;
+  --bm-space-6: 2rem;
+  --bm-space-7: 3rem;
+
+  /* Shape and elevation */
+  --bm-radius-sm: 0.25rem;
+  --bm-radius-md: 0.5rem;
+  --bm-radius-lg: 0.75rem;
+  --bm-border-width: 1px;
+  --bm-focus-ring-width: 0.125rem;
+  --bm-focus-ring-offset: 0.125rem;
+  --bm-shadow-sm: 0 1px 2px rgb(35 33 31 / 8%);
+  --bm-shadow-md: 0 6px 18px rgb(35 33 31 / 12%);
+
+  /* Surfaces and content */
+  --bm-color-surface-app: #f4f1eb;
+  --bm-color-surface-primary: #fffdfa;
+  --bm-color-surface-secondary: #ede9e1;
+  --bm-color-surface-elevated: #ffffff;
+  --bm-color-text-primary: #23211f;
+  --bm-color-text-secondary: #625d55;
+  --bm-color-text-muted: #716a61;
+  --bm-color-border-default: #d9d3c9;
+  --bm-color-border-strong: #aaa196;
+
+  /* Actions and focus */
+  --bm-color-accent: #315c52;
+  --bm-color-accent-hover: #264a42;
+  --bm-color-accent-active: #1e3c35;
+  --bm-color-accent-contrast: #ffffff;
+  --bm-color-accent-subtle: #dce9e4;
+  --bm-color-focus-ring: #2b6fbe;
+
+  /* Semantic states */
+  --bm-color-success: #1f5b3d;
+  --bm-color-success-surface: #e7f3ec;
+  --bm-color-warning: #755100;
+  --bm-color-warning-surface: #fff3d6;
+  --bm-color-danger: #8a2f2f;
+  --bm-color-danger-surface: #fae8e7;
+  --bm-color-info: #285b83;
+  --bm-color-info-surface: #e8f2f8;
+}
