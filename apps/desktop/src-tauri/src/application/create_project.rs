@@ -12,13 +12,12 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::persistence::migrations::{run_migrations, MigrationError};
+use crate::persistence::project_manifest::{
+    ProjectManifest, DATABASE_FILE, MANIFEST_FILE, PROJECT_EXTENSION, PROJECT_FORMAT_VERSION,
+};
+#[cfg(test)]
+use crate::persistence::project_manifest::{PROJECT_CREATOR, PROJECT_FORMAT};
 
-const PROJECT_FORMAT: &str = "bookmaker-project";
-const PROJECT_FORMAT_VERSION: i64 = 1;
-const PROJECT_CREATOR: &str = "BookMaker";
-const PROJECT_EXTENSION: &str = "bookmaker";
-const MANIFEST_FILE: &str = "manifest.json";
-const DATABASE_FILE: &str = "project.db";
 const REQUIRED_DIRECTORIES: &[&str] = &[
     "assets/images",
     "assets/covers",
@@ -168,16 +167,6 @@ struct ValidatedCreateProject {
     destination: PathBuf,
     title: String,
     language: String,
-}
-
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-struct ProjectManifest<'a> {
-    format: &'static str,
-    format_version: i64,
-    project_id: &'a str,
-    created_by: &'static str,
-    minimum_app_version: &'static str,
 }
 
 pub fn create_project(input: CreateProjectInput) -> Result<CreatedProject, CreateProjectError> {
@@ -361,13 +350,7 @@ fn initialize_database(
 }
 
 fn write_manifest(destination: &Path, project_id: &str) -> Result<(), CreateProjectError> {
-    let manifest = ProjectManifest {
-        format: PROJECT_FORMAT,
-        format_version: PROJECT_FORMAT_VERSION,
-        project_id,
-        created_by: PROJECT_CREATOR,
-        minimum_app_version: env!("CARGO_PKG_VERSION"),
-    };
+    let manifest = ProjectManifest::new(project_id.to_owned());
     let temporary_path = destination.join("manifest.json.tmp");
     let manifest_path = destination.join(MANIFEST_FILE);
     let mut file = OpenOptions::new()

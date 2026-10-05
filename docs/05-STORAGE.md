@@ -38,6 +38,14 @@ No futuro, `.bookmaker` pode ser um pacote/arquivo compactado para distribuiçã
 - `manifest.json` é gravado por arquivo temporário e rename;
 - falhas removem somente a raiz recém-criada, evitando projetos parciais.
 
+## Abertura da workspace
+
+- a raiz deve ser um diretório `.bookmaker` real, não um symlink;
+- o manifest é validado antes de abrir o banco;
+- formatos futuros e versões mínimas incompatíveis falham de modo explícito;
+- migrations são executadas antes da leitura dos dados;
+- `projectId` e `formatVersion` devem coincidir entre manifest e SQLite.
+
 ## `manifest.json`
 
 Informações mínimas para identificar e migrar o projeto antes de abrir o banco.
