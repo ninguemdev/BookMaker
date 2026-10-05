@@ -46,6 +46,16 @@ No futuro, `.bookmaker` pode ser um pacote/arquivo compactado para distribuiçã
 - migrations são executadas antes da leitura dos dados;
 - `projectId` e `formatVersion` devem coincidir entre manifest e SQLite.
 
+## Projetos recentes
+
+A lista de projetos recentes pertence aos dados locais da aplicação, não à workspace. Ela:
+
+- é atualizada depois de criar ou abrir um projeto com sucesso;
+- não bloqueia a criação/abertura caso sua própria gravação falhe;
+- deduplica entradas por `projectId` e caminho;
+- mantém projetos movidos ou ausentes marcados como indisponíveis;
+- usa arquivo versionado com gravação temporária e backup de substituição.
+
 ## `manifest.json`
 
 Informações mínimas para identificar e migrar o projeto antes de abrir o banco.

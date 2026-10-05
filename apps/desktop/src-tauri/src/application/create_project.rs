@@ -41,6 +41,8 @@ pub struct CreateProjectInput {
 pub struct CreatedProject {
     pub project_id: String,
     pub path: PathBuf,
+    pub title: String,
+    pub language: String,
 }
 
 #[derive(Debug)]
@@ -198,6 +200,8 @@ fn create_project_with_id(
         Ok(()) => Ok(CreatedProject {
             project_id,
             path: input.destination,
+            title: input.title,
+            language: input.language,
         }),
         Err(error) => Err(rollback_failed_creation(&input.destination, error)),
     }

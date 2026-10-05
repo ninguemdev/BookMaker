@@ -9,7 +9,8 @@ pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             commands::create_project,
-            commands::open_project
+            commands::open_project,
+            commands::list_recent_projects
         ])
         .plugin(
             tauri_plugin_log::Builder::new()
