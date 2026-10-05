@@ -1,7 +1,7 @@
 node_modules/
 dist/
 target/
-src-tauri/gen/
+**/src-tauri/gen/
 pnpm-lock.yaml
 
 docs/
