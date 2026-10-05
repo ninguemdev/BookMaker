@@ -147,6 +147,15 @@ Separar **autosave** de **recovery**.
 
 Manter journal/checkpoint de documentos sujos. Na inicialização, detectar sessão não encerrada e oferecer recuperação quando houver divergência.
 
+Fundação implementada:
+
+- `recovery/session.json` identifica a sessão e impede ownership silencioso por outra sessão;
+- checkpoints ficam separados por documento em `recovery/documents/`;
+- cada checkpoint inclui versão, schema do conteúdo, timestamp e revisão persistida de referência;
+- substituição usa arquivo temporário e backup;
+- somente a sessão proprietária grava, limpa checkpoints ou encerra o marcador;
+- IDs usados como nomes físicos são validados contra path traversal.
+
 ## Snapshots
 
 Snapshots são versões de segurança semânticas.

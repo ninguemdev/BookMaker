@@ -10,7 +10,12 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::create_project,
             commands::open_project,
-            commands::list_recent_projects
+            commands::list_recent_projects,
+            commands::begin_recovery_session,
+            commands::end_recovery_session,
+            commands::write_recovery_checkpoint,
+            commands::list_recovery_checkpoints,
+            commands::clear_recovery_checkpoint
         ])
         .plugin(
             tauri_plugin_log::Builder::new()

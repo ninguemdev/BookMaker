@@ -11,6 +11,15 @@ use crate::application::recent_projects::{
     list_recent_projects as execute_list_recent_projects, record_recent_project, RecentProject,
     RecentProjectUpdate, RecentProjectsError,
 };
+use crate::application::recovery_journal::{
+    begin_recovery_session as execute_begin_recovery_session,
+    clear_recovery_checkpoint as execute_clear_recovery_checkpoint,
+    end_recovery_session as execute_end_recovery_session,
+    list_recovery_checkpoints as execute_list_recovery_checkpoints,
+    write_recovery_checkpoint as execute_write_recovery_checkpoint, EndRecoverySessionInput,
+    RecoveryCheckpoint, RecoveryDocumentInput, RecoveryJournalError, RecoverySession,
+    WriteRecoveryCheckpointInput,
+};
 use tauri::Manager;
 
 #[derive(Serialize)]
@@ -40,6 +49,15 @@ impl From<&OpenProjectError> for CommandError {
 
 impl From<&RecentProjectsError> for CommandError {
     fn from(error: &RecentProjectsError) -> Self {
+        Self {
+            code: error.code(),
+            message: error.user_message(),
+        }
+    }
+}
+
+impl From<&RecoveryJournalError> for CommandError {
+    fn from(error: &RecoveryJournalError) -> Self {
         Self {
             code: error.code(),
             message: error.user_message(),
@@ -108,6 +126,37 @@ pub fn list_recent_projects(app: tauri::AppHandle) -> Result<Vec<RecentProject>,
     })
 }
 
+#[tauri::command]
+pub fn begin_recovery_session(
+    project_path: std::path::PathBuf,
+) -> Result<RecoverySession, CommandError> {
+    execute_begin_recovery_session(&project_path).map_err(map_recovery_error)
+}
+
+#[tauri::command]
+pub fn end_recovery_session(input: EndRecoverySessionInput) -> Result<(), CommandError> {
+    execute_end_recovery_session(input).map_err(map_recovery_error)
+}
+
+#[tauri::command]
+pub fn write_recovery_checkpoint(
+    input: WriteRecoveryCheckpointInput,
+) -> Result<RecoveryCheckpoint, CommandError> {
+    execute_write_recovery_checkpoint(input).map_err(map_recovery_error)
+}
+
+#[tauri::command]
+pub fn list_recovery_checkpoints(
+    project_path: std::path::PathBuf,
+) -> Result<Vec<RecoveryCheckpoint>, CommandError> {
+    execute_list_recovery_checkpoints(&project_path).map_err(map_recovery_error)
+}
+
+#[tauri::command]
+pub fn clear_recovery_checkpoint(input: RecoveryDocumentInput) -> Result<(), CommandError> {
+    execute_clear_recovery_checkpoint(input).map_err(map_recovery_error)
+}
+
 fn record_recent_best_effort(app: &tauri::AppHandle, project: RecentProjectUpdate) {
     let result = application_data_directory(app).and_then(|data_directory| {
         record_recent_project(&data_directory, project).map_err(|error| CommandError::from(&error))
@@ -129,4 +178,13 @@ fn application_data_directory(app: &tauri::AppHandle) -> Result<std::path::PathB
             message: "Não foi possível acessar os dados locais do BookMaker.",
         }
     })
+}
+
+fn map_recovery_error(error: RecoveryJournalError) -> CommandError {
+    log::error!(
+        target: "recovery",
+        "recovery_operation_failed code={} error={error}",
+        error.code()
+    );
+    CommandError::from(&error)
 }
