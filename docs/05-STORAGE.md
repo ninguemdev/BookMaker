@@ -29,6 +29,15 @@ MyBook.bookmaker/
 
 No futuro, `.bookmaker` pode ser um pacote/arquivo compactado para distribuição. O editor deve trabalhar sobre uma workspace descompactada/segura, nunca alterar diretamente um ZIP a cada tecla.
 
+## Criação da workspace
+
+- o destino deve ser um novo diretório com extensão `.bookmaker`;
+- a raiz existente nunca é sobrescrita;
+- diretórios, banco e dados iniciais são preparados antes do manifest;
+- `project_info` e os metadados mínimos são persistidos na mesma transação;
+- `manifest.json` é gravado por arquivo temporário e rename;
+- falhas removem somente a raiz recém-criada, evitando projetos parciais.
+
 ## `manifest.json`
 
 Informações mínimas para identificar e migrar o projeto antes de abrir o banco.
@@ -126,6 +135,8 @@ Cada mudança persistida requer migration incremental.
 
 Regras:
 - migrations nunca dependem de UI;
+- migrations são aplicadas em ordem e cada etapa usa uma transação própria;
+- migrations já aplicadas têm nome e checksum validados antes da abertura;
 - backup/snapshot antes de migration não reversível;
 - abrir projeto mais novo com app antigo deve falhar de modo legível;
 - testes com fixtures reais de versões anteriores.

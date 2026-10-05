@@ -1,8 +1,13 @@
 use tauri_plugin_log::{RotationStrategy, Target, TargetKind};
 
+pub mod application;
+mod commands;
+pub mod persistence;
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![commands::create_project])
         .plugin(
             tauri_plugin_log::Builder::new()
                 .clear_targets()

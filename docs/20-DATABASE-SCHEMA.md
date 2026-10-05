@@ -1,6 +1,10 @@
-# 20 — Draft do Schema SQLite V1
+# 20 — Schema SQLite V1
 
-Este documento é um ponto de partida. O SQL definitivo deve nascer junto das migrations e testes.
+Este documento apresenta o schema persistido. O SQL executável e seus testes são a fonte definitiva da versão 1:
+
+- `packages/project-format/migrations/0001_initial.sql`;
+- `apps/desktop/src-tauri/src/persistence/migrations.rs`;
+- `apps/desktop/src-tauri/tests/sqlite_schema_v1.rs`.
 
 ## `project_info`
 
