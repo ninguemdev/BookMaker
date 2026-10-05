@@ -1,8 +1,9 @@
-# 20 — Schema SQLite V1
+# 20 — Schema SQLite
 
-Este documento apresenta o schema persistido. O SQL executável e seus testes são a fonte definitiva da versão 1:
+Este documento apresenta o schema persistido atual. O SQL executável e seus testes são a fonte definitiva:
 
 - `packages/project-format/migrations/0001_initial.sql`;
+- `packages/project-format/migrations/0002_internal_trash.sql`;
 - `apps/desktop/src-tauri/src/persistence/migrations.rs`;
 - `apps/desktop/src-tauri/tests/sqlite_schema_v1.rs`.
 
@@ -78,16 +79,18 @@ id TEXT PRIMARY KEY
 parent_id TEXT
 kind TEXT NOT NULL
 role TEXT
- title TEXT NOT NULL
+title TEXT NOT NULL
 position INTEGER NOT NULL
 status TEXT NOT NULL
 created_at TEXT NOT NULL
 updated_at TEXT NOT NULL
+trashed_at TEXT
+status_before_trash TEXT
 ```
 
 Índices:
 - `(parent_id, position)`;
-- `status` se necessário.
+- `status`.
 
 ## `document_content`
 

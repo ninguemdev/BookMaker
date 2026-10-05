@@ -3,17 +3,28 @@ use std::{error::Error, fmt, fmt::Write as _};
 use rusqlite::{params, Connection, TransactionBehavior};
 use sha2::{Digest, Sha256};
 
-pub const CURRENT_SCHEMA_VERSION: i64 = 1;
+pub const CURRENT_SCHEMA_VERSION: i64 = 2;
 pub const SCHEMA_V1: &str = include_str!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/../../../packages/project-format/migrations/0001_initial.sql"
 ));
+pub const SCHEMA_V2: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/../../../packages/project-format/migrations/0002_internal_trash.sql"
+));
 
-const MIGRATIONS: &[Migration] = &[Migration {
-    version: CURRENT_SCHEMA_VERSION,
-    name: "initial",
-    sql: SCHEMA_V1,
-}];
+const MIGRATIONS: &[Migration] = &[
+    Migration {
+        version: 1,
+        name: "initial",
+        sql: SCHEMA_V1,
+    },
+    Migration {
+        version: CURRENT_SCHEMA_VERSION,
+        name: "internal_trash",
+        sql: SCHEMA_V2,
+    },
+];
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct MigrationReport {
@@ -323,7 +334,7 @@ mod tests {
             MigrationReport {
                 previous_version: 0,
                 current_version: CURRENT_SCHEMA_VERSION,
-                applied_versions: vec![1],
+                applied_versions: vec![1, 2],
             }
         );
         let recorded: (i64, String, String) = connection
@@ -377,7 +388,7 @@ mod tests {
             .execute(
                 "INSERT INTO schema_migrations (
                     version, name, applied_at, checksum
-                 ) VALUES (2, 'future', '2026-10-05T18:00:00Z', 'future')",
+                 ) VALUES (3, 'future', '2026-10-05T18:00:00Z', 'future')",
                 [],
             )
             .expect("future migration record must be inserted");
@@ -387,7 +398,7 @@ mod tests {
         assert!(matches!(
             error,
             MigrationError::UnsupportedDatabaseVersion {
-                database_version: 2,
+                database_version: 3,
                 supported_version: CURRENT_SCHEMA_VERSION,
             }
         ));
@@ -462,6 +473,37 @@ mod tests {
             migration_checksum("CREATE TABLE example (id INTEGER);\n"),
             migration_checksum("CREATE TABLE example (id INTEGER);\r\n")
         );
+    }
+
+    #[test]
+    fn migrates_a_v1_database_without_losing_documents() {
+        let mut connection = Connection::open_in_memory().expect("database must open");
+        run_migrations_with(&mut connection, &MIGRATIONS[..1]).expect("v1 fixture must be created");
+        connection
+            .execute(
+                "INSERT INTO documents (
+                    id, parent_id, kind, role, title, position, status, created_at, updated_at
+                 ) VALUES (
+                    'document-1', NULL, 'flow', 'chapter', 'Preserved', 0,
+                    'draft', '2026-10-05T18:00:00Z', '2026-10-05T18:00:00Z'
+                 )",
+                [],
+            )
+            .expect("v1 fixture document must be inserted");
+
+        let report = run_migrations(&mut connection).expect("v2 migration must succeed");
+
+        assert_eq!(report.previous_version, 1);
+        assert_eq!(report.applied_versions, vec![2]);
+        let document: (String, Option<String>, Option<String>) = connection
+            .query_row(
+                "SELECT title, trashed_at, status_before_trash
+                 FROM documents WHERE id = 'document-1'",
+                [],
+                |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+            )
+            .expect("document must survive the migration");
+        assert_eq!(document, ("Preserved".to_owned(), None, None));
     }
 
     fn table_exists(connection: &Connection, table: &str) -> bool {

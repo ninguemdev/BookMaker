@@ -184,3 +184,13 @@ Regras:
 - deletar asset só quando não referenciado ou após confirmação;
 - cache/thumbnails são descartáveis;
 - assets nunca dependem de caminhos absolutos da máquina original.
+
+## Lixeira interna
+
+Documentos movidos para a lixeira permanecem no SQLite com conteúdo e hierarquia preservados.
+
+- `status = 'trashed'` identifica a entrada;
+- `trashed_at` registra quando ocorreu a operação;
+- `status_before_trash` permite restaurar o estado anterior;
+- mover novamente para a lixeira é idempotente;
+- exclusão definitiva e UX de restauração pertencem às tasks específicas de Document Tree.
