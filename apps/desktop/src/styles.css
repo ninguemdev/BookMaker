@@ -35,6 +35,51 @@ h1 {
   line-height: var(--bm-line-height-tight);
 }
 
+.error-boundary button {
+  padding: var(--bm-space-3) var(--bm-space-4);
+  border: 0;
+  border-radius: var(--bm-radius-md);
+  color: var(--bm-color-accent-contrast);
+  font: inherit;
+  font-weight: var(--bm-font-weight-medium);
+  background: var(--bm-color-accent);
+  cursor: pointer;
+}
+
+.error-boundary button:hover {
+  background: var(--bm-color-accent-hover);
+}
+
+.error-boundary button:active {
+  background: var(--bm-color-accent-active);
+}
+
+.error-boundary {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+}
+
+.error-boundary__content {
+  width: min(100%, 32rem);
+  padding: var(--bm-space-6);
+  border: var(--bm-border-width) solid var(--bm-color-border-default);
+  border-radius: var(--bm-radius-lg);
+  background: var(--bm-color-surface-primary);
+  box-shadow: var(--bm-shadow-md);
+}
+
+.error-boundary__content > :last-child {
+  margin-bottom: 0;
+}
+
+.error-boundary__eyebrow {
+  margin: 0 0 var(--bm-space-2);
+  color: var(--bm-color-danger);
+  font-size: var(--bm-font-size-sm);
+  font-weight: var(--bm-font-weight-semibold);
+}
+
 ::selection {
   color: var(--bm-color-text-primary);
   background: var(--bm-color-accent-subtle);
