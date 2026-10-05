@@ -1,0 +1,9 @@
+node_modules/
+dist/
+target/
+src-tauri/gen/
+pnpm-lock.yaml
+
+docs/
+AGENTS.md
+README.md
