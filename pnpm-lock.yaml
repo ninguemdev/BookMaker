@@ -193,6 +193,9 @@ importers:
 
   apps/desktop:
     dependencies:
+      '@bookmaker/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
       '@bookmaker/ui':
         specifier: workspace:*
         version: link:../../packages/ui

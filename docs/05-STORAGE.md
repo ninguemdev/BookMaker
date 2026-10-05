@@ -130,6 +130,14 @@ Estratégia:
 
 Não regravar o projeto completo a cada tecla.
 
+O coordenador base:
+
+- mantém somente o conteúdo mais recente de cada documento sujo;
+- serializa saves do mesmo documento;
+- não publica `saved` antes da conclusão da persistência;
+- permite `flush(documentId)` e `flushAll()`;
+- preserva conteúdo pendente após erro para retry explícito.
+
 ## Recovery
 
 Separar **autosave** de **recovery**.
