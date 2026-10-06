@@ -266,10 +266,16 @@ importers:
       '@tiptap/extension-link':
         specifier: 3.31.4
         version: 3.31.4(@tiptap/core@3.31.4(@tiptap/pm@3.31.4))(@tiptap/pm@3.31.4)
+      '@tiptap/pm':
+        specifier: 3.31.4
+        version: 3.31.4
       '@tiptap/starter-kit':
         specifier: 3.31.4
         version: 3.31.4
     devDependencies:
+      jsdom:
+        specifier: 30.1.2
+        version: 30.1.2
       typescript:
         specifier: ~6.0.3
         version: 6.0.3

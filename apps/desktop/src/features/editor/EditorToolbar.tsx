@@ -156,6 +156,16 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
           }
           pressed={editor?.isActive("blockquote") ?? false}
         />
+        <ToolbarButton
+          disabled={isUnavailable}
+          label="Quebra de cena"
+          onClick={() =>
+            run((currentEditor) =>
+              currentEditor.chain().focus().insertSceneBreak().run(),
+            )
+          }
+          pressed={editor?.isActive("sceneBreak") ?? false}
+        />
       </div>
 
       <div aria-label="Ênfase" className="editor-toolbar__group" role="group">

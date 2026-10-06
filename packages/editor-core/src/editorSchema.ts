@@ -7,6 +7,8 @@ import {
 import { isAllowedUri } from "@tiptap/extension-link";
 import StarterKit from "@tiptap/starter-kit";
 
+import { SCENE_BREAK_NODE_NAME, SceneBreak } from "./sceneBreak";
+
 export const EDITOR_SCHEMA_VERSION = 1;
 
 const BookDocument = Node.create({
@@ -28,6 +30,7 @@ export function createEditorExtensions(): Extensions {
       horizontalRule: false,
       strike: false,
     }),
+    SceneBreak,
   ];
 }
 
@@ -137,6 +140,15 @@ function assertKnownNodeShape(value: unknown): void {
     if (level !== undefined && level !== 1 && level !== 2 && level !== 3) {
       throw new RangeError("Editor heading level must be 1, 2, or 3");
     }
+  }
+
+  if (
+    value.type === SCENE_BREAK_NODE_NAME &&
+    (value.content !== undefined ||
+      value.marks !== undefined ||
+      value.text !== undefined)
+  ) {
+    throw new RangeError("Scene break cannot contain text, marks, or children");
   }
 
   if (value.marks !== undefined) {

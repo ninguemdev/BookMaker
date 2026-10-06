@@ -44,6 +44,7 @@ const supportedContent = {
         },
       ],
     },
+    { type: "sceneBreak" },
     {
       type: "bulletList",
       content: [
@@ -89,6 +90,7 @@ describe("editor schema v1", () => {
       "listItem",
       "orderedList",
       "paragraph",
+      "sceneBreak",
       "text",
     ]);
     expect(Object.keys(editorSchema.marks).sort()).toEqual([

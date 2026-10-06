@@ -88,6 +88,20 @@ describe("EditorToolbar", () => {
     expect(editor.isActive("bulletList")).toBe(true);
   });
 
+  it("inserts a semantic scene break", () => {
+    const editor = createEditor();
+    editor.commands.setTextSelection(14);
+    render(<EditorToolbar editor={editor} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Quebra de cena" }));
+
+    expect(editor.getJSON().content?.map((node) => node.type)).toEqual([
+      "paragraph",
+      "sceneBreak",
+      "paragraph",
+    ]);
+  });
+
   it("validates, applies, and removes links", () => {
     const editor = createEditor();
     editor.commands.setTextSelection({ from: 1, to: 6 });

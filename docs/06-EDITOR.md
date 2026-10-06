@@ -32,7 +32,7 @@ Nodes:
 - `hardBreak`;
 - `horizontalRule` somente se semanticamente diferente de `sceneBreak` (não
   integra a versão 1);
-- `sceneBreak` custom (task própria);
+- `sceneBreak` custom;
 - `image` custom (task própria);
 - `footnote` futuramente;
 - `text`.
@@ -49,7 +49,7 @@ Marks:
 
 A toolbar expõe somente os comandos presentes no schema atual:
 
-- parágrafo, headings de nível 1 a 3 e blockquote;
+- parágrafo, headings de nível 1 a 3, blockquote e scene break;
 - bold, italic, underline e link;
 - listas com e sem numeração;
 - undo e redo.
@@ -73,6 +73,11 @@ Esses recursos transformariam o documento semântico em DTP genérico e dificult
 `sceneBreak` deve ser node próprio.
 
 Motivo: o tema decide se será espaço, asteriscos, ornamento ou outro símbolo.
+
+Na versão 1, o node é atômico, não possui atributos ou conteúdo e usa
+`<hr data-scene-break>` apenas como representação no editor/clipboard. A
+aparência de publicação não é derivada desse HTML. O comando
+`insertSceneBreak` mantém o cursor em um parágrafo editável após a inserção.
 
 ## Imagens
 

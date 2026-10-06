@@ -10,3 +10,5 @@ export {
 } from "./editorSchema";
 
 export type { JSONContent as EditorContent } from "@tiptap/core";
+
+export { SCENE_BREAK_NODE_NAME, SceneBreak } from "./sceneBreak";
