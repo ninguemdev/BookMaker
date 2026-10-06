@@ -1,5 +1,9 @@
 use serde::Serialize;
 
+use crate::application::create_document::{
+    create_document as execute_create_document, CreateDocumentError, CreateDocumentInput,
+    CreatedDocument,
+};
 use crate::application::create_project::{
     create_project as execute_create_project, CreateProjectError, CreateProjectInput,
     CreatedProject,
@@ -31,6 +35,15 @@ pub struct CommandError {
 
 impl From<&CreateProjectError> for CommandError {
     fn from(error: &CreateProjectError) -> Self {
+        Self {
+            code: error.code(),
+            message: error.user_message(),
+        }
+    }
+}
+
+impl From<&CreateDocumentError> for CommandError {
+    fn from(error: &CreateDocumentError) -> Self {
         Self {
             code: error.code(),
             message: error.user_message(),
@@ -87,6 +100,18 @@ pub fn create_project(
         },
     );
     Ok(created)
+}
+
+#[tauri::command]
+pub fn create_document(input: CreateDocumentInput) -> Result<CreatedDocument, CommandError> {
+    execute_create_document(input).map_err(|error| {
+        log::error!(
+            target: "document",
+            "create_document_failed code={} error={error}",
+            error.code()
+        );
+        CommandError::from(&error)
+    })
 }
 
 #[tauri::command]

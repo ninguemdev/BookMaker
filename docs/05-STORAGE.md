@@ -116,6 +116,15 @@ document_content
 - updated_at
 ```
 
+## Criação de documentos
+
+Na V1, a criação inicial produz um `FlowDocument` raiz com papel `chapter`, status `active` e conteúdo semântico vazio. O título é normalizado e precisa conter texto.
+
+- a posição é anexada ao fim da raiz;
+- a linha estrutural e o conteúdo inicial são gravados na mesma transação;
+- falha em qualquer gravação não deixa documento parcial;
+- criação de filhos, roles configuráveis e edição pertencem às tasks específicas seguintes.
+
 ## Autosave
 
 Objetivo: usuário nunca precisar pensar no botão Save.

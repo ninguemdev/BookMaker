@@ -9,6 +9,7 @@ pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             commands::create_project,
+            commands::create_document,
             commands::open_project,
             commands::list_recent_projects,
             commands::begin_recovery_session,
