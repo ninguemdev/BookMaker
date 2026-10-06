@@ -24,17 +24,6 @@ body {
   background: var(--bm-color-surface-app);
 }
 
-main {
-  padding: var(--bm-space-6);
-}
-
-h1 {
-  margin: 0;
-  font-size: var(--bm-font-size-2xl);
-  font-weight: var(--bm-font-weight-semibold);
-  line-height: var(--bm-line-height-tight);
-}
-
 .document-tree__root,
 .document-tree__group {
   padding: 0;

@@ -43,6 +43,7 @@
 - BM-306 find document;
 - BM-307 find project;
 - BM-308 focus mode;
+- BM-308A integrar Writing Workspace visual;
 - BM-309 editor autosave integration.
 
 ## Epic: Metadata/Rights

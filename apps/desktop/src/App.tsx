@@ -1,9 +1,7 @@
+import { WritingWorkspace } from "./features/editor/WritingWorkspace";
+
 function App() {
-  return (
-    <main>
-      <h1>BookMaker</h1>
-    </main>
-  );
+  return <WritingWorkspace />;
 }
 
 export default App;
