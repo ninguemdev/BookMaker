@@ -194,6 +194,22 @@ A contagem considera somente o texto semântico do documento atual, atualiza
 depois de cada mudança de conteúdo e aparece de forma não intrusiva em seu
 status. Ela não usa `split(' ')` nem depende do HTML visual do editor.
 
+## Modo foco
+
+O modo foco mantém o editor atual centralizado e oculta as regiões secundárias
+marcadas pela workspace, como navegação do manuscrito, inspector e ações não
+essenciais. Essas regiões usam o atributo HTML `hidden`, portanto também saem
+da navegação por teclado e da árvore de acessibilidade enquanto o modo está
+ativo. O editor, seu conteúdo e o histórico não são recriados.
+
+`Ctrl/Cmd+Shift+Enter` alterna o modo foco e `Escape` sai dele. Um `Escape` já
+tratado por um controle interno, como busca ou edição de link, não fecha também
+o modo foco. O botão de saída permanece visível e o estado continua ativo ao
+trocar o documento atual dentro da mesma workspace.
+
+O modo foco é estado transitório de UI. Ele não solicita fullscreen do sistema
+e não é persistido no projeto.
+
 ## Acessibilidade
 
 Editor deve manter:
