@@ -19,14 +19,24 @@
   font-size: var(--bm-font-size-2xl);
 }
 
+.project-launcher__card h2 {
+  margin: 0;
+  font-size: var(--bm-font-size-lg);
+}
+
 .project-launcher__eyebrow,
-.project-launcher__hint {
+.project-launcher__hint,
+.project-launcher__field-hint {
   color: var(--bm-color-text-muted);
   font-size: var(--bm-font-size-sm);
 }
 
 .project-launcher__eyebrow {
   margin: 0 0 var(--bm-space-2);
+}
+
+.project-launcher__field-hint {
+  margin: calc(var(--bm-space-2) * -1) 0 0;
 }
 
 .project-launcher__card form {
@@ -48,6 +58,23 @@
   border: var(--bm-border-width) solid var(--bm-color-border-default);
   border-radius: var(--bm-radius-sm);
   font: inherit;
+}
+
+.project-launcher__path-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--bm-space-2);
+}
+
+.project-launcher__card .project-launcher__secondary-button {
+  color: var(--bm-color-text-primary);
+  background: var(--bm-color-surface-primary);
+}
+
+.project-launcher__divider {
+  height: var(--bm-border-width);
+  margin-top: var(--bm-space-6);
+  background: var(--bm-color-border-default);
 }
 
 .project-launcher__card button,
