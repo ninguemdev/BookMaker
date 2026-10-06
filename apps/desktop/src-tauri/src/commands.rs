@@ -24,6 +24,10 @@ use crate::application::recovery_journal::{
     RecoveryCheckpoint, RecoveryDocumentInput, RecoveryJournalError, RecoverySession,
     WriteRecoveryCheckpointInput,
 };
+use crate::application::rename_document::{
+    rename_document as execute_rename_document, RenameDocumentError, RenameDocumentInput,
+    RenamedDocument,
+};
 use tauri::Manager;
 
 #[derive(Serialize)]
@@ -44,6 +48,15 @@ impl From<&CreateProjectError> for CommandError {
 
 impl From<&CreateDocumentError> for CommandError {
     fn from(error: &CreateDocumentError) -> Self {
+        Self {
+            code: error.code(),
+            message: error.user_message(),
+        }
+    }
+}
+
+impl From<&RenameDocumentError> for CommandError {
+    fn from(error: &RenameDocumentError) -> Self {
         Self {
             code: error.code(),
             message: error.user_message(),
@@ -108,6 +121,18 @@ pub fn create_document(input: CreateDocumentInput) -> Result<CreatedDocument, Co
         log::error!(
             target: "document",
             "create_document_failed code={} error={error}",
+            error.code()
+        );
+        CommandError::from(&error)
+    })
+}
+
+#[tauri::command]
+pub fn rename_document(input: RenameDocumentInput) -> Result<RenamedDocument, CommandError> {
+    execute_rename_document(input).map_err(|error| {
+        log::error!(
+            target: "document",
+            "rename_document_failed code={} error={error}",
             error.code()
         );
         CommandError::from(&error)

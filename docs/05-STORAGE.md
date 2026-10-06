@@ -125,6 +125,10 @@ Na V1, a criação inicial produz um `FlowDocument` raiz com papel `chapter`, st
 - falha em qualquer gravação não deixa documento parcial;
 - criação de filhos, roles configuráveis e edição pertencem às tasks específicas seguintes.
 
+## Renomeação de documentos
+
+A renomeação normaliza espaços externos e rejeita títulos sem texto. O título e o timestamp estrutural do documento são atualizados junto ao timestamp do projeto em uma única transação; o conteúdo editorial e seu timestamp não são alterados.
+
 ## Autosave
 
 Objetivo: usuário nunca precisar pensar no botão Save.
