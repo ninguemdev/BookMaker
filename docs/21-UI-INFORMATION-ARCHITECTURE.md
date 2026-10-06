@@ -32,6 +32,15 @@ A implementação desktop não precisa necessariamente expor URL real; a estrutu
 - botão adicionar
 - busca/filtro
 
+A árvore usa semântica ARIA e um único item no ciclo de Tab. Com o foco na árvore:
+
+- `↑` e `↓` percorrem os itens visíveis;
+- `→` expande um item ou entra no primeiro filho quando ele já está expandido;
+- `←` recolhe um item ou volta ao pai;
+- `Home` e `End` vão ao primeiro e ao último item visível;
+- `Enter` e `Space` selecionam o documento focado;
+- itens recolhidos não permanecem no percurso de foco.
+
 ### Centro
 - título do documento;
 - editor;

@@ -35,6 +35,48 @@ h1 {
   line-height: var(--bm-line-height-tight);
 }
 
+.document-tree__root,
+.document-tree__group {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.document-tree__group {
+  padding-left: var(--bm-space-4);
+}
+
+.document-tree__item {
+  border-radius: var(--bm-radius-sm);
+  cursor: default;
+}
+
+.document-tree__item[aria-selected="true"] > .document-tree__row {
+  color: var(--bm-color-accent);
+  background: var(--bm-color-accent-subtle);
+}
+
+.document-tree__row {
+  display: flex;
+  gap: var(--bm-space-1);
+  align-items: center;
+  min-height: 2rem;
+  padding: var(--bm-space-1) var(--bm-space-2);
+  border-radius: inherit;
+}
+
+.document-tree__indicator {
+  width: var(--bm-space-3);
+  color: var(--bm-color-text-muted);
+  text-align: center;
+}
+
+.document-tree__empty {
+  margin: var(--bm-space-2) 0 0;
+  color: var(--bm-color-text-muted);
+  font-size: var(--bm-font-size-sm);
+}
+
 .error-boundary button {
   padding: var(--bm-space-3) var(--bm-space-4);
   border: 0;
