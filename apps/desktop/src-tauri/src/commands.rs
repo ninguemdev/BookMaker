@@ -8,6 +8,12 @@ use crate::application::create_project::{
     create_project as execute_create_project, CreateProjectError, CreateProjectInput,
     CreatedProject,
 };
+use crate::application::document_trash::{
+    list_trashed_documents as execute_list_trashed_documents,
+    restore_document as execute_restore_document, trash_document as execute_trash_document,
+    DocumentTrashError, ListTrashedDocumentsInput, RestoreDocumentInput, RestoredDocument,
+    TrashDocumentInput, TrashedDocument,
+};
 use crate::application::move_document::{
     move_document as execute_move_document, MoveDocumentError, MoveDocumentInput, MovedDocument,
 };
@@ -69,6 +75,15 @@ impl From<&RenameDocumentError> for CommandError {
 
 impl From<&MoveDocumentError> for CommandError {
     fn from(error: &MoveDocumentError) -> Self {
+        Self {
+            code: error.code(),
+            message: error.user_message(),
+        }
+    }
+}
+
+impl From<&DocumentTrashError> for CommandError {
+    fn from(error: &DocumentTrashError) -> Self {
         Self {
             code: error.code(),
             message: error.user_message(),
@@ -161,6 +176,23 @@ pub fn move_document(input: MoveDocumentInput) -> Result<MovedDocument, CommandE
         );
         CommandError::from(&error)
     })
+}
+
+#[tauri::command]
+pub fn trash_document(input: TrashDocumentInput) -> Result<TrashedDocument, CommandError> {
+    execute_trash_document(input).map_err(map_document_trash_error)
+}
+
+#[tauri::command]
+pub fn restore_document(input: RestoreDocumentInput) -> Result<RestoredDocument, CommandError> {
+    execute_restore_document(input).map_err(map_document_trash_error)
+}
+
+#[tauri::command]
+pub fn list_trashed_documents(
+    input: ListTrashedDocumentsInput,
+) -> Result<Vec<TrashedDocument>, CommandError> {
+    execute_list_trashed_documents(input).map_err(map_document_trash_error)
 }
 
 #[tauri::command]
@@ -258,6 +290,15 @@ fn map_recovery_error(error: RecoveryJournalError) -> CommandError {
     log::error!(
         target: "recovery",
         "recovery_operation_failed code={} error={error}",
+        error.code()
+    );
+    CommandError::from(&error)
+}
+
+fn map_document_trash_error(error: DocumentTrashError) -> CommandError {
+    log::error!(
+        target: "document",
+        "document_trash_operation_failed code={} error={error}",
         error.code()
     );
     CommandError::from(&error)

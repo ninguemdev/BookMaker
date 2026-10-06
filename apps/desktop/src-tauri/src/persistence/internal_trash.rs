@@ -72,8 +72,9 @@ pub fn move_document_to_trash(
         .optional()?;
     let status =
         status.ok_or_else(|| InternalTrashError::DocumentNotFound(document_id.to_owned()))?;
+    let status_changed = status != "trashed";
 
-    if status != "trashed" {
+    if status_changed {
         transaction.execute(
             "UPDATE documents
              SET status_before_trash = status,
@@ -98,6 +99,12 @@ pub fn move_document_to_trash(
             })
         },
     )?;
+    if status_changed {
+        transaction.execute(
+            "UPDATE project_info SET updated_at = ?1",
+            [&trashed.trashed_at],
+        )?;
+    }
     transaction.commit()?;
     Ok(trashed)
 }
@@ -124,15 +131,20 @@ pub fn restore_document_from_trash(
     }
 
     let restored_status = previous_status.unwrap_or_else(|| "active".to_owned());
+    let updated_at: String =
+        transaction.query_row("SELECT strftime('%Y-%m-%dT%H:%M:%fZ', 'now')", [], |row| {
+            row.get(0)
+        })?;
     transaction.execute(
         "UPDATE documents
          SET status = ?2,
              status_before_trash = NULL,
              trashed_at = NULL,
-             updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+             updated_at = ?3
          WHERE id = ?1",
-        params![document_id, restored_status],
+        params![document_id, restored_status, updated_at],
     )?;
+    transaction.execute("UPDATE project_info SET updated_at = ?1", [&updated_at])?;
     transaction.commit()?;
 
     Ok(RestoredDocument {

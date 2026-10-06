@@ -216,4 +216,7 @@ Documentos movidos para a lixeira permanecem no SQLite com conteúdo e hierarqui
 - `trashed_at` registra quando ocorreu a operação;
 - `status_before_trash` permite restaurar o estado anterior;
 - mover novamente para a lixeira é idempotente;
-- exclusão definitiva e UX de restauração pertencem às tasks específicas de Document Tree.
+- conteúdo, posição e hierarquia são preservados ao mover e restaurar;
+- o timestamp do projeto é atualizado na mesma transação da mudança;
+- a árvore de documentos expõe operações para mover, listar e restaurar itens da lixeira;
+- exclusão definitiva não integra o fluxo atual e exige uma task explícita.
