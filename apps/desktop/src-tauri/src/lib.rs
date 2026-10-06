@@ -21,6 +21,7 @@ pub fn run() {
             commands::end_recovery_session,
             commands::write_recovery_checkpoint,
             commands::list_recovery_checkpoints,
+            commands::search_project,
             commands::clear_recovery_checkpoint
         ])
         .plugin(

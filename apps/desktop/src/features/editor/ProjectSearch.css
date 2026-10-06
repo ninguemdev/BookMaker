@@ -1,0 +1,98 @@
+.project-search {
+  position: relative;
+  display: inline-flex;
+}
+
+.project-search button,
+.project-search input {
+  min-height: 2rem;
+  border: var(--bm-border-width) solid var(--bm-color-border-default);
+  border-radius: var(--bm-radius-sm);
+  color: var(--bm-color-text-primary);
+  font: inherit;
+  font-size: var(--bm-font-size-sm);
+  background: var(--bm-color-surface-primary);
+}
+
+.project-search button {
+  padding: var(--bm-space-1) var(--bm-space-2);
+  cursor: pointer;
+}
+
+.project-search button:disabled {
+  color: var(--bm-color-text-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.project-search__panel {
+  position: absolute;
+  z-index: 2;
+  top: calc(100% + var(--bm-space-2));
+  right: 0;
+  width: min(34rem, calc(100vw - 2 * var(--bm-space-4)));
+  padding: var(--bm-space-3);
+  border: var(--bm-border-width) solid var(--bm-color-border-default);
+  border-radius: var(--bm-radius-md);
+  background: var(--bm-color-surface-elevated);
+  box-shadow: var(--bm-shadow-md);
+}
+
+.project-search__form label {
+  display: block;
+  margin-bottom: var(--bm-space-2);
+  font-size: var(--bm-font-size-sm);
+  font-weight: var(--bm-font-weight-medium);
+}
+
+.project-search__controls {
+  display: flex;
+  gap: var(--bm-space-1);
+}
+
+.project-search__controls input {
+  flex: 1;
+  min-width: 8rem;
+  padding: var(--bm-space-1) var(--bm-space-2);
+}
+
+.project-search__results {
+  max-height: 24rem;
+  overflow: auto;
+}
+
+.project-search__summary,
+.project-search__results > p {
+  margin: var(--bm-space-3) 0 0;
+  color: var(--bm-color-text-muted);
+  font-size: var(--bm-font-size-sm);
+}
+
+.project-search__error {
+  color: var(--bm-color-danger) !important;
+}
+
+.project-search__list {
+  display: grid;
+  gap: var(--bm-space-1);
+  padding: 0;
+  margin: var(--bm-space-2) 0 0;
+  list-style: none;
+}
+
+.project-search__list button {
+  display: grid;
+  gap: var(--bm-space-1);
+  width: 100%;
+  padding: var(--bm-space-2);
+  text-align: left;
+}
+
+.project-search__list button:hover {
+  border-color: var(--bm-color-border-strong);
+  background: var(--bm-color-accent-subtle);
+}
+
+.project-search__list span {
+  color: var(--bm-color-text-secondary);
+}

@@ -160,7 +160,21 @@ com retorno circular, selecionando e revelando a ocorrência ativa no editor;
 `Escape` fecha o controle. A busca acompanha alterações do conteúdo sem entrar
 no histórico de undo/redo.
 
-A busca em todo o projeto pertence à BM-307 e não faz parte deste contrato.
+A busca em todo o projeto consulta no backend os `FlowDocument` persistidos e
+fora da lixeira, sem enviar o conteúdo integral do manuscrito para a UI. O
+resultado contém título do documento, trecho curto e posições UTF-16
+compatíveis com uma seleção ProseMirror. A UI usa essas posições para abrir o
+documento diretamente na ocorrência.
+
+`Ctrl/Cmd+Shift+F` abre esse fluxo. A consulta segue as mesmas regras literais,
+de caixa e acentuação da busca local. A resposta é limitada a 200 ocorrências e
+informa truncamento para que o usuário refine o termo. A consulta e o texto do
+manuscrito nunca são escritos em logs.
+
+Na implementação atual o índice é transitório, criado durante a consulta sobre
+o conteúdo persistido. Um índice SQLite dedicado só deve ser introduzido com
+benchmark e necessidade comprovada, acompanhado de migration e estratégia de
+sincronização.
 
 Resultado inclui:
 - título do documento;

@@ -37,6 +37,10 @@ use crate::application::rename_document::{
     rename_document as execute_rename_document, RenameDocumentError, RenameDocumentInput,
     RenamedDocument,
 };
+use crate::application::search_project::{
+    search_project as execute_search_project, ProjectSearchResults, SearchProjectError,
+    SearchProjectInput,
+};
 use tauri::Manager;
 
 #[derive(Serialize)]
@@ -111,6 +115,15 @@ impl From<&RecentProjectsError> for CommandError {
 
 impl From<&RecoveryJournalError> for CommandError {
     fn from(error: &RecoveryJournalError) -> Self {
+        Self {
+            code: error.code(),
+            message: error.user_message(),
+        }
+    }
+}
+
+impl From<&SearchProjectError> for CommandError {
+    fn from(error: &SearchProjectError) -> Self {
         Self {
             code: error.code(),
             message: error.user_message(),
@@ -256,6 +269,18 @@ pub fn list_recovery_checkpoints(
     project_path: std::path::PathBuf,
 ) -> Result<Vec<RecoveryCheckpoint>, CommandError> {
     execute_list_recovery_checkpoints(&project_path).map_err(map_recovery_error)
+}
+
+#[tauri::command]
+pub fn search_project(input: SearchProjectInput) -> Result<ProjectSearchResults, CommandError> {
+    execute_search_project(input).map_err(|error| {
+        log::error!(
+            target: "project_search",
+            "search_project_failed code={} error={error}",
+            error.code()
+        );
+        CommandError::from(&error)
+    })
 }
 
 #[tauri::command]
