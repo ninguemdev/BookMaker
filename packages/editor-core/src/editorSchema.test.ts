@@ -6,9 +6,9 @@ import {
   createEmptyEditorContent,
   editorSchema,
   isEditorContent,
-  isSafeEditorLink,
   parseEditorContent,
 } from "./editorSchema";
+import { isSafeEditorLink } from "./link";
 
 const supportedContent = {
   type: "doc",

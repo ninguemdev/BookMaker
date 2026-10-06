@@ -99,6 +99,18 @@ e mantém um parágrafo editável depois dele.
 
 ## Paste
 
+O paste sanitizer base é aplicado antes do parser do ProseMirror. Ele usa uma
+allowlist compatível com o schema atual e:
+
+- preserva texto Unicode, parágrafos, headings 1–3, blockquote, listas e marks
+  simples;
+- remove estilos, classes, event handlers e atributos externos;
+- remove elementos executáveis ou incorporados, como script, iframe e SVG;
+- mantém links somente quando a URL é segura;
+- converte imagens externas em seu alt/caption textual, sem importar `src`;
+- preserva `sceneBreak` e `image` apenas quando possuem os marcadores internos
+  e atributos válidos do BookMaker.
+
 Prioridades:
 1. preservar texto;
 2. preservar semântica simples;

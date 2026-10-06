@@ -4,7 +4,6 @@ import {
   type Extensions,
   type JSONContent,
 } from "@tiptap/core";
-import { isAllowedUri } from "@tiptap/extension-link";
 import StarterKit from "@tiptap/starter-kit";
 
 import {
@@ -12,6 +11,8 @@ import {
   IMAGE_NODE_NAME,
   assertValidImageAttributes,
 } from "./image";
+import { isSafeEditorLink } from "./link";
+import { PasteSanitizer } from "./pasteSanitizer";
 import { SCENE_BREAK_NODE_NAME, SceneBreak } from "./sceneBreak";
 
 export const EDITOR_SCHEMA_VERSION = 1;
@@ -36,6 +37,7 @@ export function createEditorExtensions(): Extensions {
       strike: false,
     }),
     BookImage,
+    PasteSanitizer,
     SceneBreak,
   ];
 }
@@ -193,14 +195,6 @@ function assertSafeLinks(
       }
     }
   });
-}
-
-export function isSafeEditorLink(href: unknown): href is string {
-  return (
-    typeof href === "string" &&
-    href.trim().length > 0 &&
-    Boolean(isAllowedUri(href))
-  );
 }
 
 export function parseEditorContent(value: unknown): JSONContent {

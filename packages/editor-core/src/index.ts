@@ -5,7 +5,6 @@ export {
   createEmptyEditorContent,
   editorSchema,
   isEditorContent,
-  isSafeEditorLink,
   parseEditorContent,
 } from "./editorSchema";
 
@@ -24,4 +23,10 @@ export type {
   ImageWidthPreset,
   InsertImageOptions,
 } from "./image";
+export { isSafeEditorLink } from "./link";
+export {
+  PasteSanitizer,
+  sanitizePastedHtml,
+  sanitizePastedText,
+} from "./pasteSanitizer";
 export { SCENE_BREAK_NODE_NAME, SceneBreak } from "./sceneBreak";
