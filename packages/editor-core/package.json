@@ -14,6 +14,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@bookmaker/domain": "workspace:*",
     "@tiptap/core": "3.31.4",
     "@tiptap/extension-link": "3.31.4",
     "@tiptap/pm": "3.31.4",

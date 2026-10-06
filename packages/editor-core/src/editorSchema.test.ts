@@ -87,6 +87,7 @@ describe("editor schema v1", () => {
       "doc",
       "hardBreak",
       "heading",
+      "image",
       "listItem",
       "orderedList",
       "paragraph",

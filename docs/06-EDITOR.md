@@ -33,7 +33,7 @@ Nodes:
 - `horizontalRule` somente se semanticamente diferente de `sceneBreak` (não
   integra a versão 1);
 - `sceneBreak` custom;
-- `image` custom (task própria);
+- `image` custom;
 - `footnote` futuramente;
 - `text`.
 
@@ -83,12 +83,19 @@ aparência de publicação não é derivada desse HTML. O comando
 
 A imagem no documento referencia `AssetId`, não caminho absoluto.
 
-Atributos possíveis:
-- alt text;
-- caption;
-- alignment semântico;
-- width preset/percentual limitado;
-- decorative flag.
+Atributos da versão 1:
+- `assetId` obrigatório;
+- `alt` textual;
+- `caption` opcional;
+- `alignment`: `left`, `center` ou `right`;
+- `width`: `small`, `medium`, `large` ou `full`;
+- `decorative` booleano; quando verdadeiro, `alt` deve ficar vazio.
+
+O HTML do editor/clipboard usa um marcador `figure[data-bookmaker-image]` com
+metadata semântica e nunca persiste `src` ou caminho de filesystem. A resolução
+visual do `AssetId` pertence à integração com a Asset Library. O comando
+`insertImage` recebe um `AssetId`, insere o node como uma operação de histórico
+e mantém um parágrafo editável depois dele.
 
 ## Paste
 

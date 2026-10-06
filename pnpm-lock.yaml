@@ -260,6 +260,9 @@ importers:
 
   packages/editor-core:
     dependencies:
+      '@bookmaker/domain':
+        specifier: workspace:*
+        version: link:../domain
       '@tiptap/core':
         specifier: 3.31.4
         version: 3.31.4(@tiptap/pm@3.31.4)

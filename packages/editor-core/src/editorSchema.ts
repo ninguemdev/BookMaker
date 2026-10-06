@@ -7,6 +7,11 @@ import {
 import { isAllowedUri } from "@tiptap/extension-link";
 import StarterKit from "@tiptap/starter-kit";
 
+import {
+  BookImage,
+  IMAGE_NODE_NAME,
+  assertValidImageAttributes,
+} from "./image";
 import { SCENE_BREAK_NODE_NAME, SceneBreak } from "./sceneBreak";
 
 export const EDITOR_SCHEMA_VERSION = 1;
@@ -30,6 +35,7 @@ export function createEditorExtensions(): Extensions {
       horizontalRule: false,
       strike: false,
     }),
+    BookImage,
     SceneBreak,
   ];
 }
@@ -143,12 +149,18 @@ function assertKnownNodeShape(value: unknown): void {
   }
 
   if (
-    value.type === SCENE_BREAK_NODE_NAME &&
+    (value.type === IMAGE_NODE_NAME || value.type === SCENE_BREAK_NODE_NAME) &&
     (value.content !== undefined ||
       value.marks !== undefined ||
       value.text !== undefined)
   ) {
-    throw new RangeError("Scene break cannot contain text, marks, or children");
+    throw new RangeError(
+      "Atomic editor nodes cannot contain text, marks, or children",
+    );
+  }
+
+  if (value.type === IMAGE_NODE_NAME) {
+    assertValidImageAttributes(value.attrs);
   }
 
   if (value.marks !== undefined) {
