@@ -10,7 +10,6 @@ use crate::{
 };
 
 const FLOW_DOCUMENT_KIND: &str = "flow";
-const DEFAULT_FLOW_DOCUMENT_ROLE: &str = "chapter";
 const ACTIVE_DOCUMENT_STATUS: &str = "active";
 const INITIAL_CONTENT_SCHEMA_VERSION: i64 = 1;
 const INITIAL_FLOW_CONTENT: &str = r#"{"type":"doc","content":[]}"#;
@@ -20,6 +19,8 @@ const INITIAL_FLOW_CONTENT: &str = r#"{"type":"doc","content":[]}"#;
 pub struct CreateDocumentInput {
     pub project_path: PathBuf,
     pub title: String,
+    #[serde(default)]
+    pub role: Option<String>,
 }
 
 #[derive(Debug, PartialEq, Eq, Serialize)]
@@ -29,6 +30,7 @@ pub struct CreatedDocument {
     pub parent_id: Option<String>,
     pub kind: &'static str,
     pub role: &'static str,
+    pub section: &'static str,
     pub title: String,
     pub position: i64,
     pub status: &'static str,
@@ -39,6 +41,7 @@ pub struct CreatedDocument {
 #[derive(Debug)]
 pub enum CreateDocumentError {
     InvalidTitle,
+    InvalidRole,
     OpenProject(OpenProjectError),
     Database {
         path: PathBuf,
@@ -50,6 +53,7 @@ impl CreateDocumentError {
     pub fn code(&self) -> &'static str {
         match self {
             Self::InvalidTitle => "document.invalid_title",
+            Self::InvalidRole => "document.invalid_role",
             Self::OpenProject(source) => source.code(),
             Self::Database { .. } => "document.create_failed",
         }
@@ -58,6 +62,7 @@ impl CreateDocumentError {
     pub fn user_message(&self) -> &'static str {
         match self {
             Self::InvalidTitle => "Informe um título para o documento.",
+            Self::InvalidRole => "Escolha um tipo de documento válido.",
             Self::OpenProject(source) => source.user_message(),
             Self::Database { .. } => "Não foi possível criar o documento.",
         }
@@ -68,6 +73,7 @@ impl fmt::Display for CreateDocumentError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::InvalidTitle => formatter.write_str("document title cannot be blank"),
+            Self::InvalidRole => formatter.write_str("flow document role is not supported"),
             Self::OpenProject(source) => write!(formatter, "cannot open project: {source}"),
             Self::Database { path, source } => write!(
                 formatter,
@@ -83,13 +89,94 @@ impl Error for CreateDocumentError {
         match self {
             Self::OpenProject(source) => Some(source),
             Self::Database { source, .. } => Some(source),
-            Self::InvalidTitle => None,
+            Self::InvalidTitle | Self::InvalidRole => None,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum FlowDocumentRole {
+    Part,
+    Chapter,
+    Section,
+    TitlePage,
+    CopyrightPage,
+    Dedication,
+    Epigraph,
+    Toc,
+    Preface,
+    Introduction,
+    Appendix,
+    Acknowledgements,
+    AboutAuthor,
+    CustomFrontMatter,
+    CustomBackMatter,
+}
+
+impl FlowDocumentRole {
+    fn parse(value: &str) -> Option<Self> {
+        match value {
+            "part" => Some(Self::Part),
+            "chapter" => Some(Self::Chapter),
+            "section" => Some(Self::Section),
+            "titlePage" => Some(Self::TitlePage),
+            "copyrightPage" => Some(Self::CopyrightPage),
+            "dedication" => Some(Self::Dedication),
+            "epigraph" => Some(Self::Epigraph),
+            "toc" => Some(Self::Toc),
+            "preface" => Some(Self::Preface),
+            "introduction" => Some(Self::Introduction),
+            "appendix" => Some(Self::Appendix),
+            "acknowledgements" => Some(Self::Acknowledgements),
+            "aboutAuthor" => Some(Self::AboutAuthor),
+            "customFrontMatter" => Some(Self::CustomFrontMatter),
+            "customBackMatter" => Some(Self::CustomBackMatter),
+            _ => None,
+        }
+    }
+
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::Part => "part",
+            Self::Chapter => "chapter",
+            Self::Section => "section",
+            Self::TitlePage => "titlePage",
+            Self::CopyrightPage => "copyrightPage",
+            Self::Dedication => "dedication",
+            Self::Epigraph => "epigraph",
+            Self::Toc => "toc",
+            Self::Preface => "preface",
+            Self::Introduction => "introduction",
+            Self::Appendix => "appendix",
+            Self::Acknowledgements => "acknowledgements",
+            Self::AboutAuthor => "aboutAuthor",
+            Self::CustomFrontMatter => "customFrontMatter",
+            Self::CustomBackMatter => "customBackMatter",
+        }
+    }
+
+    fn section(self) -> &'static str {
+        match self {
+            Self::Part | Self::Chapter | Self::Section => "manuscript",
+            Self::TitlePage
+            | Self::CopyrightPage
+            | Self::Dedication
+            | Self::Epigraph
+            | Self::Toc
+            | Self::Preface
+            | Self::Introduction
+            | Self::CustomFrontMatter => "frontMatter",
+            Self::Appendix
+            | Self::Acknowledgements
+            | Self::AboutAuthor
+            | Self::CustomBackMatter => "backMatter",
         }
     }
 }
 
 pub fn create_document(input: CreateDocumentInput) -> Result<CreatedDocument, CreateDocumentError> {
     let title = validate_title(&input.title)?;
+    let role = validate_role(input.role.as_deref())?;
     let project = open_project(OpenProjectInput {
         path: input.project_path,
     })
@@ -102,7 +189,7 @@ pub fn create_document(input: CreateDocumentInput) -> Result<CreatedDocument, Cr
         .pragma_update(None, "foreign_keys", true)
         .map_err(|source| database_error(&database_path, source))?;
 
-    insert_document(&mut connection, Uuid::now_v7().to_string(), title)
+    insert_document(&mut connection, Uuid::now_v7().to_string(), title, role)
         .map_err(|source| database_error(&database_path, source))
 }
 
@@ -114,10 +201,18 @@ fn validate_title(title: &str) -> Result<String, CreateDocumentError> {
     Ok(title.to_owned())
 }
 
+fn validate_role(role: Option<&str>) -> Result<FlowDocumentRole, CreateDocumentError> {
+    let Some(role) = role else {
+        return Ok(FlowDocumentRole::Chapter);
+    };
+    FlowDocumentRole::parse(role.trim()).ok_or(CreateDocumentError::InvalidRole)
+}
+
 fn insert_document(
     connection: &mut Connection,
     document_id: String,
     title: String,
+    role: FlowDocumentRole,
 ) -> rusqlite::Result<CreatedDocument> {
     let transaction = connection.transaction_with_behavior(TransactionBehavior::Immediate)?;
     let position = transaction.query_row(
@@ -139,7 +234,7 @@ fn insert_document(
         params![
             document_id,
             FLOW_DOCUMENT_KIND,
-            DEFAULT_FLOW_DOCUMENT_ROLE,
+            role.as_str(),
             title,
             position,
             ACTIVE_DOCUMENT_STATUS,
@@ -164,7 +259,8 @@ fn insert_document(
         document_id,
         parent_id: None,
         kind: FLOW_DOCUMENT_KIND,
-        role: DEFAULT_FLOW_DOCUMENT_ROLE,
+        role: role.as_str(),
+        section: role.section(),
         title,
         position,
         status: ACTIVE_DOCUMENT_STATUS,
@@ -231,12 +327,14 @@ mod tests {
         let created = create_document(CreateDocumentInput {
             project_path: project.path.clone(),
             title: "  Capítulo — Café  ".to_owned(),
+            role: None,
         })
         .expect("document must be created");
 
         assert_eq!(created.parent_id, None);
         assert_eq!(created.kind, "flow");
         assert_eq!(created.role, "chapter");
+        assert_eq!(created.section, "manuscript");
         assert_eq!(created.title, "Capítulo — Café");
         assert_eq!(created.position, 0);
         assert_eq!(created.status, "active");
@@ -289,11 +387,13 @@ mod tests {
         let first = create_document(CreateDocumentInput {
             project_path: project.path.clone(),
             title: "Primeiro".to_owned(),
+            role: None,
         })
         .unwrap();
         let second = create_document(CreateDocumentInput {
             project_path: project.path.clone(),
             title: "Segundo".to_owned(),
+            role: None,
         })
         .unwrap();
 
@@ -302,14 +402,70 @@ mod tests {
     }
 
     #[test]
+    fn creates_every_supported_role_in_its_editorial_section() {
+        let project = TestProject::create();
+        let roles = [
+            ("part", "manuscript"),
+            ("chapter", "manuscript"),
+            ("section", "manuscript"),
+            ("titlePage", "frontMatter"),
+            ("copyrightPage", "frontMatter"),
+            ("dedication", "frontMatter"),
+            ("epigraph", "frontMatter"),
+            ("toc", "frontMatter"),
+            ("preface", "frontMatter"),
+            ("introduction", "frontMatter"),
+            ("customFrontMatter", "frontMatter"),
+            ("appendix", "backMatter"),
+            ("acknowledgements", "backMatter"),
+            ("aboutAuthor", "backMatter"),
+            ("customBackMatter", "backMatter"),
+        ];
+
+        for (role, section) in roles {
+            let created = create_document(CreateDocumentInput {
+                project_path: project.path.clone(),
+                title: role.to_owned(),
+                role: Some(format!("  {role}  ")),
+            })
+            .expect("supported role must create a document");
+
+            assert_eq!(created.role, role);
+            assert_eq!(created.section, section);
+            let persisted_role: String = project
+                .connection()
+                .query_row(
+                    "SELECT role FROM documents WHERE id = ?1",
+                    [&created.document_id],
+                    |row| row.get(0),
+                )
+                .unwrap();
+            assert_eq!(persisted_role, role);
+        }
+    }
+
+    #[test]
     fn rejects_a_blank_title_before_accessing_the_project() {
         let error = create_document(CreateDocumentInput {
             project_path: PathBuf::from("missing.bookmaker"),
             title: "   ".to_owned(),
+            role: None,
         })
         .expect_err("blank titles must be rejected");
 
         assert!(matches!(error, CreateDocumentError::InvalidTitle));
+    }
+
+    #[test]
+    fn rejects_an_unknown_role_before_accessing_the_project() {
+        let error = create_document(CreateDocumentInput {
+            project_path: PathBuf::from("missing.bookmaker"),
+            title: "Documento".to_owned(),
+            role: Some("unknownRole".to_owned()),
+        })
+        .expect_err("unknown roles must be rejected");
+
+        assert!(matches!(error, CreateDocumentError::InvalidRole));
     }
 
     #[test]
@@ -330,6 +486,7 @@ mod tests {
             &mut connection,
             Uuid::now_v7().to_string(),
             "Capítulo".to_owned(),
+            FlowDocumentRole::Chapter,
         )
         .expect_err("content failure must abort document creation");
 

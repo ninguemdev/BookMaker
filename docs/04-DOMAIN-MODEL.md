@@ -46,9 +46,14 @@ Na V1, `CanvasDocument` pode existir apenas como contrato/reserva de arquitetura
 
 ## Papéis de FlowDocument
 
+### Manuscrito
+
 - `part`;
 - `chapter`;
 - `section`;
+
+### Front matter
+
 - `titlePage`;
 - `copyrightPage`;
 - `dedication`;
@@ -56,11 +61,16 @@ Na V1, `CanvasDocument` pode existir apenas como contrato/reserva de arquitetura
 - `toc`;
 - `preface`;
 - `introduction`;
+- `customFrontMatter`;
+
+### Back matter
+
 - `appendix`;
 - `acknowledgements`;
 - `aboutAuthor`;
-- `customFrontMatter`;
 - `customBackMatter`.
+
+A seção editorial é derivada do papel e não é persistida separadamente. Isso mantém uma única fonte de verdade para o agrupamento da árvore e para a ordem futura de publicação.
 
 ## Conteúdo semântico
 

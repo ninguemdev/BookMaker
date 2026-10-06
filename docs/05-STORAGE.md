@@ -118,12 +118,13 @@ document_content
 
 ## Criação de documentos
 
-Na V1, a criação inicial produz um `FlowDocument` raiz com papel `chapter`, status `active` e conteúdo semântico vazio. O título é normalizado e precisa conter texto.
+Na V1, a criação produz um `FlowDocument` raiz, com status `active` e conteúdo semântico vazio. O título é normalizado e precisa conter texto. O papel opcional é validado contra `FlowDocumentRole`; quando omitido, usa `chapter`.
 
 - a posição é anexada ao fim da raiz;
 - a linha estrutural e o conteúdo inicial são gravados na mesma transação;
 - falha em qualquer gravação não deixa documento parcial;
-- criação de filhos, roles configuráveis e edição pertencem às tasks específicas seguintes.
+- a seção editorial (`frontMatter`, `manuscript` ou `backMatter`) é derivada do papel, sem coluna persistida adicional;
+- criação direta de filhos e edição pertencem às tasks específicas seguintes.
 
 ## Renomeação de documentos
 

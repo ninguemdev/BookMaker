@@ -282,6 +282,7 @@ mod tests {
             create_document(CreateDocumentInput {
                 project_path: self.path.clone(),
                 title: title.to_owned(),
+                role: None,
             })
             .expect("test document must be created")
         }
