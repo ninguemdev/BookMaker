@@ -7,6 +7,8 @@ export {
   isEditorContent,
   parseEditorContent,
 } from "./editorSchema";
+export { findDocumentMatches } from "./documentSearch";
+export type { DocumentTextMatch } from "./documentSearch";
 
 export type { JSONContent as EditorContent } from "@tiptap/core";
 

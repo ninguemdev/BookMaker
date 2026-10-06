@@ -150,6 +150,18 @@ Duas modalidades:
 - documento atual: rápida/local;
 - projeto: índice/consulta de todos os documentos.
 
+A busca no documento atual é literal, não diferencia maiúsculas de minúsculas
+e mantém diferenças de acentuação. Ela pesquisa separadamente cada bloco de
+texto semântico, portanto não cria uma ocorrência artificial atravessando dois
+parágrafos ou nodes atômicos.
+
+`Ctrl/Cmd+F` abre a busca local. `Enter` e `Shift+Enter` percorrem as ocorrências
+com retorno circular, selecionando e revelando a ocorrência ativa no editor;
+`Escape` fecha o controle. A busca acompanha alterações do conteúdo sem entrar
+no histórico de undo/redo.
+
+A busca em todo o projeto pertence à BM-307 e não faz parte deste contrato.
+
 Resultado inclui:
 - título do documento;
 - trecho;
