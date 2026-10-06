@@ -45,6 +45,19 @@ Marks:
 - link;
 - emphasis custom somente quando necessário.
 
+## Toolbar inicial
+
+A toolbar expõe somente os comandos presentes no schema atual:
+
+- parágrafo, headings de nível 1 a 3 e blockquote;
+- bold, italic, underline e link;
+- listas com e sem numeração;
+- undo e redo.
+
+Os controles informam o estado ativo com `aria-pressed`, ficam indisponíveis sem
+um editor e exibem no tooltip os atalhos implementados. A edição de link valida
+o endereço antes de aplicar a mark e permite removê-la sem alterar o texto.
+
 ## O que não permitir por padrão
 
 - `<span style="font-size: 17.3px">` arbitrário;

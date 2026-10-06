@@ -5,6 +5,7 @@ export {
   createEmptyEditorContent,
   editorSchema,
   isEditorContent,
+  isSafeEditorLink,
   parseEditorContent,
 } from "./editorSchema";
 

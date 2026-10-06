@@ -164,15 +164,19 @@ function assertSafeLinks(
       }
 
       const href: unknown = mark.attrs.href;
-      if (
-        typeof href !== "string" ||
-        href.trim().length === 0 ||
-        !isAllowedUri(href)
-      ) {
+      if (!isSafeEditorLink(href)) {
         throw new RangeError("Editor link contains an unsafe URL");
       }
     }
   });
+}
+
+export function isSafeEditorLink(href: unknown): href is string {
+  return (
+    typeof href === "string" &&
+    href.trim().length > 0 &&
+    Boolean(isAllowedUri(href))
+  );
 }
 
 export function parseEditorContent(value: unknown): JSONContent {

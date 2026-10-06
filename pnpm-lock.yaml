@@ -196,6 +196,9 @@ importers:
       '@bookmaker/domain':
         specifier: workspace:*
         version: link:../../packages/domain
+      '@bookmaker/editor-core':
+        specifier: workspace:*
+        version: link:../../packages/editor-core
       '@bookmaker/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -205,6 +208,9 @@ importers:
       '@tauri-apps/plugin-log':
         specifier: ^2.10.0
         version: 2.10.0
+      '@tiptap/core':
+        specifier: 3.31.4
+        version: 3.31.4(@tiptap/pm@3.31.4)
       react:
         specifier: ^19.1.0
         version: 19.3.0

@@ -6,6 +6,7 @@ import {
   createEmptyEditorContent,
   editorSchema,
   isEditorContent,
+  isSafeEditorLink,
   parseEditorContent,
 } from "./editorSchema";
 
@@ -114,6 +115,13 @@ describe("editor schema v1", () => {
         content: [{ type: "heading", attrs: { level } }],
       }),
     ).toBe(true);
+  });
+
+  it("accepts safe editor links and rejects executable URLs", () => {
+    expect(isSafeEditorLink("https://example.com/book")).toBe(true);
+    expect(isSafeEditorLink("chapter-2.xhtml#section")).toBe(true);
+    expect(isSafeEditorLink("javascript:alert(1)")).toBe(false);
+    expect(isSafeEditorLink("   ")).toBe(false);
   });
 
   it.each([
