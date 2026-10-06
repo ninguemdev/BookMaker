@@ -7,3 +7,4 @@ pub mod recent_projects;
 pub mod recovery_journal;
 pub mod rename_document;
 pub mod search_project;
+pub mod writing_project;

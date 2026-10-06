@@ -22,7 +22,10 @@ pub fn run() {
             commands::write_recovery_checkpoint,
             commands::list_recovery_checkpoints,
             commands::search_project,
-            commands::clear_recovery_checkpoint
+            commands::clear_recovery_checkpoint,
+            commands::load_writing_project,
+            commands::load_document_content,
+            commands::save_document_content
         ])
         .plugin(
             tauri_plugin_log::Builder::new()

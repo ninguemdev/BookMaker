@@ -1,0 +1,72 @@
+.project-launcher {
+  display: grid;
+  min-height: 100vh;
+  padding: var(--bm-space-5);
+  place-items: center;
+}
+
+.project-launcher__card {
+  width: min(100%, 36rem);
+  padding: var(--bm-space-7);
+  border: var(--bm-border-width) solid var(--bm-color-border-default);
+  border-radius: var(--bm-radius-lg);
+  background: var(--bm-color-surface-primary);
+  box-shadow: var(--bm-shadow-md);
+}
+
+.project-launcher__card h1 {
+  margin: 0 0 var(--bm-space-2);
+  font-size: var(--bm-font-size-2xl);
+}
+
+.project-launcher__eyebrow,
+.project-launcher__hint {
+  color: var(--bm-color-text-muted);
+  font-size: var(--bm-font-size-sm);
+}
+
+.project-launcher__eyebrow {
+  margin: 0 0 var(--bm-space-2);
+}
+
+.project-launcher__card form {
+  display: grid;
+  gap: var(--bm-space-3);
+  margin-top: var(--bm-space-6);
+}
+
+.project-launcher__card label {
+  font-size: var(--bm-font-size-sm);
+  font-weight: var(--bm-font-weight-medium);
+}
+
+.project-launcher__card input,
+.project-launcher__card button,
+.writing-workspace-state button {
+  min-height: 2.5rem;
+  padding: var(--bm-space-2) var(--bm-space-3);
+  border: var(--bm-border-width) solid var(--bm-color-border-default);
+  border-radius: var(--bm-radius-sm);
+  font: inherit;
+}
+
+.project-launcher__card button,
+.writing-workspace-state button {
+  color: var(--bm-color-accent-contrast);
+  font-weight: var(--bm-font-weight-medium);
+  background: var(--bm-color-accent);
+  cursor: pointer;
+}
+
+.project-launcher__card button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.project-launcher__error {
+  color: var(--bm-color-danger);
+}
+
+.project-launcher__hint {
+  margin: var(--bm-space-5) 0 0;
+}

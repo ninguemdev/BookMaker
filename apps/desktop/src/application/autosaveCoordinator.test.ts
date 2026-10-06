@@ -65,12 +65,15 @@ describe("AutosaveCoordinator", () => {
       saveDocument: vi.fn(async () => undefined),
     };
     const coordinator = new AutosaveCoordinator(port, { debounceMs: 1_000 });
+    expect(coordinator.hasPendingChanges()).toBe(false);
     coordinator.markDirty(documentId, "content");
+    expect(coordinator.hasPendingChanges()).toBe(true);
 
     await coordinator.flush(documentId);
 
     expect(port.saveDocument).toHaveBeenCalledOnce();
     expect(coordinator.getStatus().state).toBe("saved");
+    expect(coordinator.hasPendingChanges()).toBe(false);
   });
 
   it("saves again when content changes during an active save", async () => {

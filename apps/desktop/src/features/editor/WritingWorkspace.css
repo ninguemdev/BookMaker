@@ -52,13 +52,20 @@
   align-items: center;
 }
 
-.writing-workspace__session-badge {
-  padding: var(--bm-space-1) var(--bm-space-2);
+.writing-workspace__close-project,
+.writing-workspace__save-status button {
+  padding: var(--bm-space-2) var(--bm-space-3);
+  border: var(--bm-border-width) solid var(--bm-color-border-default);
   border-radius: var(--bm-radius-sm);
-  color: var(--bm-color-warning);
-  font-size: var(--bm-font-size-xs);
-  font-weight: var(--bm-font-weight-medium);
-  background: var(--bm-color-warning-surface);
+  color: var(--bm-color-text-primary);
+  font: inherit;
+  background: var(--bm-color-surface-primary);
+  cursor: pointer;
+}
+
+.writing-workspace__close-project:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .writing-workspace__sidebar {
@@ -165,8 +172,24 @@
   justify-content: space-between;
   width: min(100%, 48rem);
   margin: 0 auto;
-  color: var(--bm-color-warning);
+  color: var(--bm-color-text-muted);
   font-size: var(--bm-font-size-sm);
+}
+
+.writing-workspace__save-status {
+  display: flex;
+  gap: var(--bm-space-2);
+  align-items: center;
+}
+
+.writing-workspace__save-status--error {
+  color: var(--bm-color-danger);
+}
+
+.writing-workspace__save-status button {
+  padding: var(--bm-space-1) var(--bm-space-2);
+  color: var(--bm-color-danger);
+  font-size: var(--bm-font-size-xs);
 }
 
 .writing-workspace__inspector {
@@ -204,6 +227,25 @@
 .editor-focus-mode[data-focus-mode="active"] .writing-workspace__editor {
   padding: 0;
   overflow: visible;
+}
+
+.writing-workspace-state {
+  display: grid;
+  min-height: 100vh;
+  padding: var(--bm-space-6);
+  text-align: center;
+  place-content: center;
+  justify-items: center;
+}
+
+.writing-workspace-state h1,
+.writing-workspace-state p {
+  margin-top: 0;
+}
+
+.writing-workspace-state__actions {
+  display: flex;
+  gap: var(--bm-space-3);
 }
 
 @media (max-width: 70rem) {

@@ -162,6 +162,13 @@ O coordenador base:
 - permite `flush(documentId)` e `flushAll()`;
 - preserva conteúdo pendente após erro para retry explícito.
 
+A integração do editor carrega a árvore do projeto sem trazer todos os textos
+para a memória, abre um `FlowDocument` por vez e valida seu schema na boundary
+TypeScript. Alterações usam o coordenador com debounce e são persistidas em uma
+transação que atualiza o conteúdo e o timestamp do projeto. A troca de documento
+e o fechamento explícito do projeto aguardam o flush; se ele falhar, o conteúdo
+continua no editor e a navegação é interrompida até o usuário tentar novamente.
+
 ## Recovery
 
 Separar **autosave** de **recovery**.

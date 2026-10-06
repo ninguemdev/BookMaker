@@ -1,335 +1,345 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { DocumentId } from "@bookmaker/domain";
-import {
-  createEditorExtensions,
-  editorSchema,
-  findDocumentMatches,
-  type EditorContent as EditorJsonContent,
-} from "@bookmaker/editor-core";
-import { EditorContent as TiptapEditorContent, useEditor } from "@tiptap/react";
+import type { EditorContent as EditorJsonContent } from "@bookmaker/editor-core";
 
+import {
+  AutosaveCoordinator,
+  type AutosaveStatus,
+} from "../../application/autosaveCoordinator";
+import { searchProject } from "../../application/projectSearch";
 import type {
   ProjectSearchInput,
   ProjectSearchMatch,
   ProjectSearchResults,
 } from "../../application/projectSearch";
 import {
-  DocumentTree,
-  type DocumentTreeNode,
-} from "../manuscript/DocumentTree";
-import { EditorFind } from "./EditorFind";
-import { EditorFocusMode, FocusModeDistraction } from "./EditorFocusMode";
-import { EditorToolbar } from "./EditorToolbar";
-import { EditorWordCount } from "./EditorWordCount";
-import { ProjectSearch } from "./ProjectSearch";
+  nativeWritingProjectGateway,
+  type LoadedDocumentContent,
+  type WritingDocument,
+  type WritingProject,
+  type WritingProjectGateway,
+} from "../../application/writingProject";
+import type { DocumentTreeNode } from "../manuscript/DocumentTree";
+import { WritingWorkspaceView } from "./WritingWorkspaceView";
 
 import "./WritingWorkspace.css";
 
-interface SessionDocument {
-  id: DocumentId;
-  title: string;
-  content: EditorJsonContent;
+interface WritingWorkspaceProps {
+  project: WritingProject;
+  gateway?: WritingProjectGateway;
+  onCloseProject?: () => void;
+  search?: (input: ProjectSearchInput) => Promise<ProjectSearchResults>;
+  autosaveDebounceMs?: number;
 }
 
-const chapterOneId = "00000000-0000-7000-8000-000000000001" as DocumentId;
-const chapterTwoId = "00000000-0000-7000-8000-000000000002" as DocumentId;
-const partOneId = "00000000-0000-7000-8000-000000000003" as DocumentId;
-const appendixId = "00000000-0000-7000-8000-000000000004" as DocumentId;
+type DocumentLoadState =
+  | { state: "loading"; documentId: DocumentId }
+  | { state: "ready"; document: LoadedDocumentContent }
+  | { state: "error"; documentId: DocumentId; message: string }
+  | { state: "empty" };
 
-const documentTree: readonly DocumentTreeNode[] = [
-  {
-    id: partOneId,
-    title: "Parte I",
-    children: [
-      { id: chapterOneId, title: "Capítulo 1" },
-      { id: chapterTwoId, title: "Capítulo 2" },
-    ],
-  },
-  { id: appendixId, title: "Apêndice" },
-];
-
-const initialDocuments: readonly SessionDocument[] = [
-  {
-    id: partOneId,
-    title: "Parte I",
-    content: {
-      type: "doc",
-      content: [
-        {
-          type: "heading",
-          attrs: { level: 1 },
-          content: [{ type: "text", text: "Parte I" }],
-        },
-        {
-          type: "paragraph",
-          content: [{ type: "text", text: "O começo de uma nova jornada." }],
-        },
-      ],
-    },
-  },
-  {
-    id: chapterOneId,
-    title: "Capítulo 1",
-    content: {
-      type: "doc",
-      content: [
-        {
-          type: "heading",
-          attrs: { level: 1 },
-          content: [{ type: "text", text: "A chegada" }],
-        },
-        {
-          type: "paragraph",
-          content: [
-            {
-              type: "text",
-              text: "Clara abriu a janela e encontrou a cidade coberta de névoa.",
-            },
-          ],
-        },
-        {
-          type: "paragraph",
-          content: [
-            {
-              type: "text",
-              text: "Comece a escrever aqui e experimente os controles do editor.",
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    id: chapterTwoId,
-    title: "Capítulo 2",
-    content: {
-      type: "doc",
-      content: [
-        {
-          type: "heading",
-          attrs: { level: 1 },
-          content: [{ type: "text", text: "O reencontro" }],
-        },
-        {
-          type: "paragraph",
-          content: [
-            {
-              type: "text",
-              text: "O reencontro aconteceu na plataforma vazia da estação.",
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    id: appendixId,
-    title: "Apêndice",
-    content: {
-      type: "doc",
-      content: [
-        {
-          type: "heading",
-          attrs: { level: 1 },
-          content: [{ type: "text", text: "Notas do universo" }],
-        },
-        {
-          type: "bulletList",
-          content: [
-            {
-              type: "listItem",
-              content: [
-                {
-                  type: "paragraph",
-                  content: [{ type: "text", text: "Cidade portuária" }],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-  },
-];
-
-function createSnippet(
-  document: ReturnType<typeof editorSchema.nodeFromJSON>,
-  from: number,
-  to: number,
-): string {
-  const contextStart = Math.max(0, from - 40);
-  const contextEnd = Math.min(document.content.size, to + 40);
-  return document
-    .textBetween(contextStart, contextEnd, " ", " ")
-    .replace(/\s+/g, " ")
-    .trim();
+function errorMessage(error: unknown, fallback: string): string {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof error.message === "string"
+  ) {
+    return error.message;
+  }
+  return fallback;
 }
 
-export function WritingWorkspace() {
-  const [documents, setDocuments] = useState(() =>
-    initialDocuments.map((document) => ({ ...document })),
-  );
-  const [selectedDocumentId, setSelectedDocumentId] =
-    useState<DocumentId>(chapterOneId);
-  const pendingNavigation = useRef<ProjectSearchMatch | null>(null);
-  const selectedDocument =
-    documents.find((document) => document.id === selectedDocumentId) ??
-    documents[0]!;
-
-  const updateDocumentContent = useCallback(
-    (documentId: DocumentId, content: EditorJsonContent): void => {
-      setDocuments((currentDocuments) =>
-        currentDocuments.map((document) =>
-          document.id === documentId ? { ...document, content } : document,
-        ),
-      );
-    },
-    [],
+function buildDocumentTree(
+  documents: readonly WritingDocument[],
+): DocumentTreeNode[] {
+  const nodes = new Map<DocumentId, DocumentTreeNode>();
+  const sortedDocuments = [...documents].sort(
+    (left, right) =>
+      left.position - right.position ||
+      left.documentId.localeCompare(right.documentId),
   );
 
-  const editor = useEditor(
-    {
-      content: selectedDocument.content,
-      editorProps: {
-        attributes: {
-          "aria-label": `Conteúdo de ${selectedDocument.title}`,
-          class: "writing-workspace__prose",
+  for (const document of sortedDocuments) {
+    nodes.set(document.documentId, {
+      id: document.documentId,
+      title: document.title,
+      children: [],
+    });
+  }
+
+  const roots: DocumentTreeNode[] = [];
+  for (const document of sortedDocuments) {
+    const node = nodes.get(document.documentId)!;
+    const parent = document.parentId ? nodes.get(document.parentId) : undefined;
+    if (parent?.children) {
+      (parent.children as DocumentTreeNode[]).push(node);
+    } else {
+      roots.push(node);
+    }
+  }
+  return roots;
+}
+
+function firstDocumentId(
+  tree: readonly DocumentTreeNode[],
+): DocumentId | undefined {
+  return tree[0]?.id as DocumentId | undefined;
+}
+
+export function WritingWorkspace({
+  project,
+  gateway = nativeWritingProjectGateway,
+  onCloseProject,
+  search = searchProject,
+  autosaveDebounceMs,
+}: WritingWorkspaceProps) {
+  const tree = useMemo(
+    () => buildDocumentTree(project.documents),
+    [project.documents],
+  );
+  const initialDocumentId = firstDocumentId(tree);
+  const [loadState, setLoadState] = useState<DocumentLoadState>(() =>
+    initialDocumentId
+      ? { state: "loading", documentId: initialDocumentId }
+      : { state: "empty" },
+  );
+  const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus>({
+    state: "idle",
+  });
+  const [isClosing, setIsClosing] = useState(false);
+  const loadVersion = useRef(0);
+  const [navigationMatch, setNavigationMatch] =
+    useState<ProjectSearchMatch | null>(null);
+  const coordinator = useMemo(
+    () =>
+      new AutosaveCoordinator<EditorJsonContent>(
+        {
+          saveDocument: async (documentId, content) => {
+            await gateway.saveDocument(project.path, documentId, content);
+          },
         },
-      },
-      extensions: createEditorExtensions(),
-      onCreate: ({ editor: createdEditor }) => {
-        const match = pendingNavigation.current;
-        if (match?.documentId === selectedDocument.id) {
-          pendingNavigation.current = null;
-          createdEditor
-            .chain()
-            .focus()
-            .setTextSelection({ from: match.from, to: match.to })
-            .scrollIntoView()
-            .run();
+        { debounceMs: autosaveDebounceMs, onStatusChange: setAutosaveStatus },
+      ),
+    [autosaveDebounceMs, gateway, project.path],
+  );
+
+  const loadDocument = useCallback(
+    async (documentId: DocumentId): Promise<boolean> => {
+      const currentVersion = ++loadVersion.current;
+      try {
+        const document = await gateway.loadDocument(project.path, documentId);
+        if (loadVersion.current === currentVersion) {
+          setAutosaveStatus({ state: "idle" });
+          setLoadState({ state: "ready", document });
         }
-      },
-      onUpdate: ({ editor: updatedEditor }) => {
-        updateDocumentContent(selectedDocument.id, updatedEditor.getJSON());
-      },
-    },
-    [selectedDocument.id],
-  );
-
-  const searchSession = useCallback(
-    ({ query }: ProjectSearchInput): Promise<ProjectSearchResults> => {
-      const matches: ProjectSearchMatch[] = [];
-
-      for (const document of documents) {
-        const parsedDocument = editorSchema.nodeFromJSON(document.content);
-        for (const match of findDocumentMatches(parsedDocument, query)) {
-          matches.push({
-            documentId: document.id,
-            documentTitle: document.title,
-            from: match.from,
-            snippet: createSnippet(parsedDocument, match.from, match.to),
-            to: match.to,
+        return true;
+      } catch (error: unknown) {
+        if (loadVersion.current === currentVersion) {
+          setLoadState({
+            state: "error",
+            documentId,
+            message: errorMessage(
+              error,
+              "Não foi possível carregar o documento.",
+            ),
           });
         }
+        return false;
       }
-
-      return Promise.resolve({
-        matches: matches.slice(0, 200),
-        truncated: matches.length > 200,
-      });
     },
-    [documents],
+    [gateway, project.path],
   );
 
-  const navigateToMatch = (match: ProjectSearchMatch): void => {
-    if (match.documentId === selectedDocumentId && editor !== null) {
-      editor
-        .chain()
-        .focus()
-        .setTextSelection({ from: match.from, to: match.to })
-        .scrollIntoView()
-        .run();
+  useEffect(() => {
+    if (!initialDocumentId) return;
+    const currentVersion = ++loadVersion.current;
+    void gateway
+      .loadDocument(project.path, initialDocumentId)
+      .then((document) => {
+        if (loadVersion.current === currentVersion) {
+          setAutosaveStatus({ state: "idle" });
+          setLoadState({ state: "ready", document });
+        }
+      })
+      .catch((error: unknown) => {
+        if (loadVersion.current === currentVersion) {
+          setLoadState({
+            state: "error",
+            documentId: initialDocumentId,
+            message: errorMessage(
+              error,
+              "Não foi possível carregar o documento.",
+            ),
+          });
+        }
+      });
+  }, [gateway, initialDocumentId, project.path]);
+
+  useEffect(
+    () => () => {
+      loadVersion.current += 1;
+      coordinator.dispose();
+    },
+    [coordinator],
+  );
+
+  useEffect(() => {
+    const warnBeforeBrowserClose = (event: BeforeUnloadEvent): void => {
+      if (coordinator.hasPendingChanges()) {
+        event.preventDefault();
+      }
+    };
+    window.addEventListener("beforeunload", warnBeforeBrowserClose);
+    return () =>
+      window.removeEventListener("beforeunload", warnBeforeBrowserClose);
+  }, [coordinator]);
+
+  useEffect(() => {
+    if (!("__TAURI_INTERNALS__" in window)) {
       return;
     }
 
-    pendingNavigation.current = match;
-    setSelectedDocumentId(match.documentId);
-  };
+    let disposed = false;
+    let unlisten: (() => void) | undefined;
+    void import("@tauri-apps/api/window").then(async ({ getCurrentWindow }) => {
+      if (disposed) return;
+      const applicationWindow = getCurrentWindow();
+      unlisten = await applicationWindow.onCloseRequested(async (event) => {
+        if (!coordinator.hasPendingChanges()) return;
+        event.preventDefault();
+        try {
+          await coordinator.flushAll();
+          await applicationWindow.destroy();
+        } catch {
+          // The coordinator publishes the visible error state and keeps the
+          // latest content pending for an explicit retry.
+        }
+      });
+    });
+
+    return () => {
+      disposed = true;
+      unlisten?.();
+    };
+  }, [coordinator]);
+
+  const changeDocument = useCallback(
+    async (
+      documentId: DocumentId,
+      match?: ProjectSearchMatch,
+    ): Promise<void> => {
+      if (
+        loadState.state === "ready" &&
+        loadState.document.documentId === documentId
+      ) {
+        return;
+      }
+
+      if (loadState.state === "ready") {
+        try {
+          await coordinator.flush(loadState.document.documentId);
+        } catch {
+          setNavigationMatch(null);
+          return;
+        }
+      }
+      setNavigationMatch(match ?? null);
+      setLoadState({ state: "loading", documentId });
+      await loadDocument(documentId);
+    },
+    [coordinator, loadDocument, loadState],
+  );
+
+  const retrySave = useCallback(async (): Promise<void> => {
+    if (autosaveStatus.state !== "error") return;
+    try {
+      await coordinator.flush(autosaveStatus.documentId);
+    } catch {
+      // The error remains visible and the latest content remains pending.
+    }
+  }, [autosaveStatus, coordinator]);
+
+  const closeProject = useCallback(async (): Promise<void> => {
+    if (!onCloseProject) return;
+    setIsClosing(true);
+    try {
+      await coordinator.flushAll();
+      onCloseProject();
+    } catch {
+      setIsClosing(false);
+    }
+  }, [coordinator, onCloseProject]);
+
+  if (loadState.state === "empty") {
+    return (
+      <main className="writing-workspace-state">
+        <h1>{project.title}</h1>
+        <p>Nenhum documento disponível neste projeto.</p>
+        {onCloseProject && (
+          <button onClick={onCloseProject} type="button">
+            Fechar projeto
+          </button>
+        )}
+      </main>
+    );
+  }
+
+  if (loadState.state === "loading") {
+    return (
+      <main aria-busy="true" className="writing-workspace-state">
+        <h1>BookMaker</h1>
+        <p>Carregando documento…</p>
+      </main>
+    );
+  }
+
+  if (loadState.state === "error") {
+    return (
+      <main className="writing-workspace-state">
+        <h1>Não foi possível abrir o documento</h1>
+        <p role="alert">{loadState.message}</p>
+        <div className="writing-workspace-state__actions">
+          <button
+            onClick={() => {
+              setLoadState({
+                state: "loading",
+                documentId: loadState.documentId,
+              });
+              void loadDocument(loadState.documentId);
+            }}
+            type="button"
+          >
+            Tentar novamente
+          </button>
+          {onCloseProject && (
+            <button onClick={onCloseProject} type="button">
+              Fechar projeto
+            </button>
+          )}
+        </div>
+      </main>
+    );
+  }
 
   return (
-    <EditorFocusMode editor={editor}>
-      <div className="writing-workspace">
-        <FocusModeDistraction className="writing-workspace__topbar">
-          <div className="writing-workspace__brand">
-            <h1>BookMaker</h1>
-            <p>Livro de demonstração</p>
-          </div>
-          <div className="writing-workspace__topbar-actions">
-            <span className="writing-workspace__session-badge">
-              Sessão não persistida
-            </span>
-            <ProjectSearch
-              onNavigate={navigateToMatch}
-              projectPath="session://writing-workspace"
-              search={searchSession}
-            />
-          </div>
-        </FocusModeDistraction>
-
-        <FocusModeDistraction className="writing-workspace__sidebar">
-          <nav aria-label="Manuscrito">
-            <h2>Manuscrito</h2>
-            <DocumentTree
-              defaultExpandedIds={[partOneId]}
-              nodes={documentTree}
-              onSelect={(documentId) =>
-                setSelectedDocumentId(documentId as DocumentId)
-              }
-              selectedId={selectedDocumentId}
-            />
-          </nav>
-        </FocusModeDistraction>
-
-        <main className="writing-workspace__editor">
-          <header className="writing-workspace__document-header">
-            <div>
-              <p className="writing-workspace__eyebrow">Documento atual</p>
-              <h2>{selectedDocument.title}</h2>
-            </div>
-            <EditorFind editor={editor} />
-          </header>
-
-          <EditorToolbar editor={editor} />
-          <div className="writing-workspace__page">
-            <TiptapEditorContent editor={editor} />
-          </div>
-          <footer className="writing-workspace__statusbar">
-            <EditorWordCount editor={editor} />
-            <span role="status">Alterações mantidas somente nesta sessão</span>
-          </footer>
-        </main>
-
-        <FocusModeDistraction className="writing-workspace__inspector">
-          <aside aria-label="Ajuda de escrita">
-            <h2>Atalhos</h2>
-            <dl>
-              <div>
-                <dt>Buscar</dt>
-                <dd>Ctrl/Cmd+F</dd>
-              </div>
-              <div>
-                <dt>Buscar no projeto</dt>
-                <dd>Ctrl/Cmd+Shift+F</dd>
-              </div>
-              <div>
-                <dt>Modo foco</dt>
-                <dd>Ctrl/Cmd+Shift+Enter</dd>
-              </div>
-            </dl>
-          </aside>
-        </FocusModeDistraction>
-      </div>
-    </EditorFocusMode>
+    <WritingWorkspaceView
+      autosaveStatus={autosaveStatus}
+      documents={project.documents}
+      isClosing={isClosing}
+      loadedDocument={loadState.document}
+      navigationMatch={navigationMatch}
+      onChangeDocument={changeDocument}
+      onCloseProject={onCloseProject ? () => void closeProject() : undefined}
+      onContentChange={(documentId, content) =>
+        coordinator.markDirty(documentId, content)
+      }
+      onRetrySave={retrySave}
+      onNavigationApplied={() => setNavigationMatch(null)}
+      project={project}
+      search={search}
+      tree={tree}
+    />
   );
 }

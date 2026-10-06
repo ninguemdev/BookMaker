@@ -70,6 +70,10 @@ export class AutosaveCoordinator<Content> {
     return this.status;
   }
 
+  public hasPendingChanges(): boolean {
+    return this.pendingDocuments.size > 0;
+  }
+
   public async flush(documentId: DocumentId): Promise<void> {
     while (this.pendingDocuments.has(documentId)) {
       const pending = this.pendingDocuments.get(documentId);

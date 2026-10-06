@@ -25,11 +25,11 @@ A implementação desktop não precisa necessariamente expor URL real; a estrutu
 
 ## Write
 
-A integração visual atual monta no `App` a top bar, a árvore do manuscrito, o
-editor Tiptap, a toolbar, o status, as buscas, o inspector e o modo foco. Até a
-BM-309 conectar carregamento e autosave ao projeto aberto, essa workspace usa
-documentos de demonstração mantidos somente na sessão e informa isso
-explicitamente; ela nunca apresenta esse estado como salvo.
+A integração visual monta no `App` a abertura de uma pasta `.bookmaker`, a top
+bar, a árvore persistida do manuscrito, o editor Tiptap, a toolbar, o status de
+autosave, as buscas, o inspector e o modo foco. O conteúdo é carregado sob
+demanda e a UI só apresenta o estado `Salvo` depois que a persistência nativa
+termina com sucesso.
 
 ### Sidebar esquerda
 - Front Matter

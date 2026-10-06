@@ -41,6 +41,13 @@ use crate::application::search_project::{
     search_project as execute_search_project, ProjectSearchResults, SearchProjectError,
     SearchProjectInput,
 };
+use crate::application::writing_project::{
+    load_document_content as execute_load_document_content,
+    load_writing_project as execute_load_writing_project,
+    save_document_content as execute_save_document_content, LoadDocumentContentInput,
+    LoadWritingProjectInput, LoadedDocumentContent, SaveDocumentContentInput, SavedDocumentContent,
+    WritingProject, WritingProjectError,
+};
 use tauri::Manager;
 
 #[derive(Serialize)]
@@ -124,6 +131,15 @@ impl From<&RecoveryJournalError> for CommandError {
 
 impl From<&SearchProjectError> for CommandError {
     fn from(error: &SearchProjectError) -> Self {
+        Self {
+            code: error.code(),
+            message: error.user_message(),
+        }
+    }
+}
+
+impl From<&WritingProjectError> for CommandError {
+    fn from(error: &WritingProjectError) -> Self {
         Self {
             code: error.code(),
             message: error.user_message(),
@@ -284,6 +300,37 @@ pub fn search_project(input: SearchProjectInput) -> Result<ProjectSearchResults,
 }
 
 #[tauri::command]
+pub fn load_writing_project(
+    app: tauri::AppHandle,
+    input: LoadWritingProjectInput,
+) -> Result<WritingProject, CommandError> {
+    let project = execute_load_writing_project(input).map_err(map_writing_project_error)?;
+    record_recent_best_effort(
+        &app,
+        RecentProjectUpdate {
+            project_id: project.project_id.clone(),
+            path: project.path.clone(),
+            title: project.title.clone(),
+        },
+    );
+    Ok(project)
+}
+
+#[tauri::command]
+pub fn load_document_content(
+    input: LoadDocumentContentInput,
+) -> Result<LoadedDocumentContent, CommandError> {
+    execute_load_document_content(input).map_err(map_writing_project_error)
+}
+
+#[tauri::command]
+pub fn save_document_content(
+    input: SaveDocumentContentInput,
+) -> Result<SavedDocumentContent, CommandError> {
+    execute_save_document_content(input).map_err(map_writing_project_error)
+}
+
+#[tauri::command]
 pub fn clear_recovery_checkpoint(input: RecoveryDocumentInput) -> Result<(), CommandError> {
     execute_clear_recovery_checkpoint(input).map_err(map_recovery_error)
 }
@@ -324,6 +371,15 @@ fn map_document_trash_error(error: DocumentTrashError) -> CommandError {
     log::error!(
         target: "document",
         "document_trash_operation_failed code={} error={error}",
+        error.code()
+    );
+    CommandError::from(&error)
+}
+
+fn map_writing_project_error(error: WritingProjectError) -> CommandError {
+    log::error!(
+        target: "document",
+        "document_content_operation_failed code={} error={error}",
         error.code()
     );
     CommandError::from(&error)

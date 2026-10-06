@@ -144,6 +144,10 @@ Estratégia V1:
 - troca de capítulo faz flush e carrega o próximo;
 - opcionalmente modo leitura contínua no futuro, virtualizado.
 
+Essa estratégia está conectada à persistência: a workspace carrega o JSON do
+documento selecionado sob demanda, rejeita conteúdo incompatível antes de
+montar o Tiptap e envia somente o documento alterado ao autosave.
+
 ## Busca
 
 Duas modalidades:
