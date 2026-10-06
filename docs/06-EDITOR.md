@@ -12,6 +12,15 @@ Quanto menor e mais controlado o schema, mais previsíveis ficam exportação, t
 
 ## Schema inicial
 
+O schema persistido atual é a versão `1`, implementada em
+`packages/editor-core`. Nesta versão, headings aceitam somente os níveis 1, 2 e
+3. O documento raiz aceita zero ou mais blocos para permanecer compatível com o
+conteúdo vazio criado junto de um novo `FlowDocument`.
+
+Conteúdo vindo da persistência deve passar por `parseEditorContent`. A boundary
+rejeita nodes, marks, campos e atributos desconhecidos, estruturas inválidas e
+URLs inseguras em links, sem descartar dados silenciosamente.
+
 Nodes:
 - `doc`;
 - `paragraph`;
@@ -21,9 +30,10 @@ Nodes:
 - `orderedList`;
 - `listItem`;
 - `hardBreak`;
-- `horizontalRule` somente se semanticamente diferente de `sceneBreak`;
-- `sceneBreak` custom;
-- `image` custom;
+- `horizontalRule` somente se semanticamente diferente de `sceneBreak` (não
+  integra a versão 1);
+- `sceneBreak` custom (task própria);
+- `image` custom (task própria);
 - `footnote` futuramente;
 - `text`.
 
@@ -31,7 +41,7 @@ Marks:
 - bold;
 - italic;
 - underline;
-- strike opcional;
+- strike opcional (não integra a versão 1);
 - link;
 - emphasis custom somente quando necessário.
 
