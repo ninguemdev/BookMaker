@@ -484,6 +484,19 @@ Remova complexidade acidental encontrada.
 
 ### Etapa F — Encerrar
 
+Antes do relatório final, toda task concluída deve possuir seu próprio commit.
+
+Regras obrigatórias de commit:
+
+- criar o commit somente depois que as validações aplicáveis passarem;
+- incluir apenas as alterações pertencentes à task atual;
+- usar uma mensagem curta e orientada ao resultado da task;
+- não adicionar `Co-authored-by` nem qualquer outro trailer de coautoria;
+- não reescrever commits anteriores ou incluir alterações alheias para obter uma árvore limpa;
+- informar o hash e a mensagem do commit no relatório final.
+
+Se a task não puder ser concluída ou se uma validação relevante falhar, não criar um commit declarando sucesso. Relate o bloqueio e preserve as alterações para revisão.
+
 Relatório final da task deve ser curto e objetivo:
 
 ```text
@@ -494,6 +507,9 @@ Implementado:
 
 Validações:
 - ...
+
+Commit:
+- <hash e mensagem; sem coautoria>
 
 Arquivos principais:
 - ...
