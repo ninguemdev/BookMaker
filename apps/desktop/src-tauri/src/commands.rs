@@ -8,6 +8,9 @@ use crate::application::create_project::{
     create_project as execute_create_project, CreateProjectError, CreateProjectInput,
     CreatedProject,
 };
+use crate::application::move_document::{
+    move_document as execute_move_document, MoveDocumentError, MoveDocumentInput, MovedDocument,
+};
 use crate::application::open_project::{
     open_project as execute_open_project, OpenProjectError, OpenProjectInput, OpenedProject,
 };
@@ -57,6 +60,15 @@ impl From<&CreateDocumentError> for CommandError {
 
 impl From<&RenameDocumentError> for CommandError {
     fn from(error: &RenameDocumentError) -> Self {
+        Self {
+            code: error.code(),
+            message: error.user_message(),
+        }
+    }
+}
+
+impl From<&MoveDocumentError> for CommandError {
+    fn from(error: &MoveDocumentError) -> Self {
         Self {
             code: error.code(),
             message: error.user_message(),
@@ -133,6 +145,18 @@ pub fn rename_document(input: RenameDocumentInput) -> Result<RenamedDocument, Co
         log::error!(
             target: "document",
             "rename_document_failed code={} error={error}",
+            error.code()
+        );
+        CommandError::from(&error)
+    })
+}
+
+#[tauri::command]
+pub fn move_document(input: MoveDocumentInput) -> Result<MovedDocument, CommandError> {
+    execute_move_document(input).map_err(|error| {
+        log::error!(
+            target: "document",
+            "move_document_failed code={} error={error}",
             error.code()
         );
         CommandError::from(&error)

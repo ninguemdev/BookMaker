@@ -1,5 +1,6 @@
 pub mod create_document;
 pub mod create_project;
+pub mod move_document;
 pub mod open_project;
 pub mod recent_projects;
 pub mod recovery_journal;

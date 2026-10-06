@@ -11,6 +11,7 @@ pub fn run() {
             commands::create_project,
             commands::create_document,
             commands::rename_document,
+            commands::move_document,
             commands::open_project,
             commands::list_recent_projects,
             commands::begin_recovery_session,

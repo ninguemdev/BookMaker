@@ -129,6 +129,16 @@ Na V1, a criação inicial produz um `FlowDocument` raiz com papel `chapter`, st
 
 A renomeação normaliza espaços externos e rejeita títulos sem texto. O título e o timestamp estrutural do documento são atualizados junto ao timestamp do projeto em uma única transação; o conteúdo editorial e seu timestamp não são alterados.
 
+## Movimentação de documentos
+
+O comando de movimentação recebe o documento, o novo pai opcional e sua posição final entre os filhos do destino. A operação rejeita posições fora dos limites e ciclos na hierarquia, compacta a ordem da origem e abre espaço no destino em uma única transação.
+
+- posições de irmãos permanecem contíguas e começam em zero;
+- mover para a raiz usa pai `null`;
+- documentos descendentes acompanham o documento movido;
+- timestamps estruturais dos documentos afetados e do projeto são atualizados;
+- conteúdo editorial e seu timestamp não são alterados.
+
 ## Autosave
 
 Objetivo: usuário nunca precisar pensar no botão Save.
