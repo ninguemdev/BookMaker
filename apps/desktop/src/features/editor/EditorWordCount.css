@@ -1,0 +1,5 @@
+.editor-word-count {
+  color: var(--bm-color-text-muted);
+  font-size: var(--bm-font-size-sm);
+  font-variant-numeric: tabular-nums;
+}

@@ -158,7 +158,15 @@ Resultado inclui:
 
 ## Contagem de palavras
 
-Definir regras por idioma depois; na V1 usar algoritmo consistente e documentado, não confiar em `split(' ')`.
+Regras específicas por idioma ficam para uma evolução posterior. A V1 usa um
+algoritmo determinístico que conta sequências de letras ou números Unicode e
+mantém apóstrofos e hífens internos como parte da mesma palavra. Espaços,
+pontuação isolada, emoji e nodes sem texto, como `sceneBreak` e `image`, não são
+contados.
+
+A contagem considera somente o texto semântico do documento atual, atualiza
+depois de cada mudança de conteúdo e aparece de forma não intrusiva em seu
+status. Ela não usa `split(' ')` nem depende do HTML visual do editor.
 
 ## Acessibilidade
 

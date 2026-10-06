@@ -30,3 +30,4 @@ export {
   sanitizePastedText,
 } from "./pasteSanitizer";
 export { SCENE_BREAK_NODE_NAME, SceneBreak } from "./sceneBreak";
+export { countDocumentWords, countWords } from "./wordCount";
